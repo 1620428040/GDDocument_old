@@ -1,0 +1,76 @@
+后端：
+
+USC用户系统控制器
+PMC用户权限管理
+RMC用户角色管理
+
+FSC文件系统控制器
+oaBaseFile
+oaVirtualFile	oaUploadedFile
+oaVFile2
+
+
+
+
+文件柜系统：
+
+继承关系和（伪）MVC架构
+程序名（nccos.application）	控制器				视图					数据				备注
+nccos.system.Application	oa.controller		oa.ui.container.Embed	oa.data.Abstract	基类
+oafile						oa.file				oa.file.view			oa.data.File		继承于基类
+archives					oa.file.archives	oa.file.view.archives	oa.data.Archives	继承于oafile
+oafilepersonal				oa.file.personal	oa.file.view.personal						继承于oafile
+
+相关控件
+oa.ui.toolbar.File					顶部的工具栏
+oa.ui.tabview.FilePermissionPage	赋权限的界面，有三个子类分别定义三个标签页，例如oa.ui.tabview.FilePermissionPage.Group后端：
+
+USC用户系统控制器
+PMC用户权限管理
+RMC用户角色管理
+
+FSC文件系统控制器
+oaBaseFile
+oaVirtualFile	oaUploadedFile
+oaVFile2
+
+
+
+
+文件柜系统：
+
+继承关系和（伪）MVC架构
+程序名（nccos.application）	控制器				视图					数据				备注
+nccos.system.Application	oa.controller		oa.ui.container.Embed	oa.data.Abstract	基类
+oafile						oa.file				oa.file.view			oa.data.File		继承于基类
+archives					oa.file.archives	oa.file.view.archives	oa.data.Archives	继承于oafile
+oafilepersonal				oa.file.personal	oa.file.view.personal						继承于oafile
+
+相关控件
+oa.ui.toolbar.File					顶部的工具栏
+oa.ui.tabview.FilePermissionPage	赋权限的界面，有三个子类分别定义三个标签页，例如oa.ui.tabview.FilePermissionPage.Group后端：
+
+USC用户系统控制器
+PMC用户权限管理
+RMC用户角色管理
+
+FSC文件系统控制器
+oaBaseFile
+oaVirtualFile	oaUploadedFile
+oaVFile2
+
+
+
+
+文件柜系统：
+
+继承关系和（伪）MVC架构
+程序名（nccos.application）	控制器				视图					数据				备注
+nccos.system.Application	oa.controller		oa.ui.container.Embed	oa.data.Abstract	基类
+oafile						oa.file				oa.file.view			oa.data.File		继承于基类
+archives					oa.file.archives	oa.file.view.archives	oa.data.Archives	继承于oafile
+oafilepersonal				oa.file.personal	oa.file.view.personal						继承于oafile
+
+相关控件
+oa.ui.toolbar.File					顶部的工具栏
+oa.ui.tabview.FilePermissionPage	赋权限的界面，有三个子类分别定义三个标签页，例如oa.ui.tabview.FilePermissionPage.Group

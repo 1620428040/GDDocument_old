@@ -1,0 +1,52 @@
+.DataMagic.default{
+	/*禁止用户选择文字*/
+	-moz-user-select: -moz-none;
+	-khtml-user-select: none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+/*.DataMagic.default .DMToolbar{
+	width: 100%;
+	padding: 5px;
+	background-color: lightgray;
+}
+.DataMagic.default .DMToolbar button{
+	margin-left: 5px;
+	margin-right: 5px;
+	width: 100px;
+	height: 25px;
+	background-color: lightsteelblue;
+}*/
+.DataMagic.default .DMTable{
+	border-width: 1px;
+	border-style: dashed;
+	border-color: lightblue;
+	width: 100%;
+}
+.DataMagic.default .DMTable .DMHead{
+	background-color: lightsalmon !important;
+}
+.DataMagic.default .DMTable .DMItem:nth-child(2n){
+	background-color: rgb(230,230,230);
+}
+.DataMagic.default .DMItem:hover{
+	background-color: lightgray;
+}
+.DataMagic.default .DMItem.selected{
+	background-color: dodgerblue !important;
+}
+.DataMagic.default .illegal{
+	background-color: red;
+}
+.DataMagic.default #select-options .selected{
+	background-color: #00A0FF;
+	color: white;
+}
+/*当通过picker选择输入的值的时候，用label代替input。这个类使label跟原来的input显示效果相同*/
+.DataMagic.default .picker-input{
+	padding-left: 0px;
+	height: 40px;
+	margin: 0px;
+	width: 65%;
+}

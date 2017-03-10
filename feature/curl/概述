@@ -1,0 +1,14 @@
+cURL 是一个利用URL语法规定来传输文件和数据的工具，
+支持很多协议，如HTTP、FTP、TELNET等。
+可以在命令行中模拟浏览器访问网页
+PHP也支持 cURL 库。
+
+
+
+相关链接：
+
+http://www.jb51.net/article/34745.htm
+本文将介绍 cURL 的一些高级特性，以及在PHP中如何运用它。
+
+http://blog.csdn.net/yanhui_wei/article/details/21530811
+php中curl的详细解说

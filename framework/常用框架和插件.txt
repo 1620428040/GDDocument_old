@@ -1,0 +1,15 @@
+#常用框架
+名称			基于			备注
+jQuery		JavaScript	它封装JavaScript常用的功能代码，提供一种简便的JavaScript设计模式，优化HTML文档操作、事件处理、动画设计和Ajax交互。
+	http://cdn.bootcss.com/jquery/3.1.1/jquery.min.js
+Bootstrap	jQuery		是HTML、CSS 和 JS 框架，用于开发响应式布局、移动设备优先的 WEB 项目。
+	http://cdn.bootcss.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css
+	http://cdn.bootcss.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js
+D3			JavaScript	数据可视化工具
+	http://cdn.bootcss.com/d3/4.5.0/d3.min.js
+Three		JavaScript	WebGL第三方库。提供了非常多的3D显示功能
+	http://cdn.bootcss.com/three.js/r83/three.min.js
+
+
+名称			基于		备注
+MiniColors	jQuery	一款简单的颜色选择器

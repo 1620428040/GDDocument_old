@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<link rel="stylesheet" type="text/css" href="style.css" />
+	</head>
+
+	<body>
+		<div class="ELMT1395628973255965" style="width: 960px;">
+			<div class="md" id="">
+				<!--标题项开始，以下代码为标题框内所有元素，如不需要标题框，就将此部分代码全部删除-->
+
+				<div class="md_hdc"><b></b></div>
+				<div class="md_hd">
+					<span class="mh_title"> 各地统计 </span>
+					<span style="color:#1c5a8d;display:block;font:bold 23px/28px '微软雅黑';padding:10px 100px 0 0;text-align:center;">全国参与人数：<b style="color:#c00e01;" id="total_Count">91371454</b></span>
+					<!--更多项开始-->
+
+					<!--更多项结束-->
+				</div>
+
+				<!--标题项结束-->
+				<div class="md_bd">
+
+					<div id="SUBD1395628973255967">
+						<div class="wsjylZ7622_con03">
+							<div class="con_bd">
+								<div class="mo mo2">
+									<div class="mo_hd">
+										<span class="mo_title">北京</span>
+										<div class="project-list-stats02">
+											<div class="projectpledgedwrap02">
+												<div id="group_1119519_Bar" class="projectpledged02" style="width:0%;"></div>
+												<div id="group_1119519_Per" class="baifens">0%</div>
+											</div>
+										</div>
+										<span class="opt">
+								          	总参与人数：
+								          	<i id="group_1119519_Num">213388</i>
+								        </span>
+										<div class="clear"></div>
+									</div>
+									<div class="mo_bd">
+										<div class="project-list">
+											<ul class="project-one">
+
+												<li class="project-list-stats">
+													<div class="projectstats">
+														<p class="widtha">
+															<strong>东城区：</strong>
+														</p>
+														<p class="widthd">
+
+															<span id="voteItem_135635">40113</span>
+														</p>
+													</div>
+													<div class="projectpledgedwrap">
+														<div id="img_135635" class="projectpledged" style="width: 19%;"></div>
+														<div id="item_135635_per" class="baifens">19%</div>
+													</div>
+												</li>
+
+												<li class="project-list-stats">
+													<div class="projectstats">
+														<p class="widtha">
+															<strong>西城区：</strong>
+														</p>
+														<p class="widthd">
+
+															<span id="voteItem_135636">13448</span>
+														</p>
+													</div>
+													<div class="projectpledgedwrap">
+														<div id="img_135636" class="projectpledged" style="width: 6%;"></div>
+														<div id="item_135636_per" class="baifens">6%</div>
+													</div>
+												</li>
+
+												<li class="project-list-stats">
+													<div class="projectstats">
+														<p class="widtha">
+															<strong>朝阳区：</strong>
+														</p>
+														<p class="widthd">
+
+															<span id="voteItem_135637">64862</span>
+														</p>
+													</div>
+													<div class="projectpledgedwrap">
+														<div id="img_135637" class="projectpledged" style="width: 30%;"></div>
+														<div id="item_135637_per" class="baifens">30%</div>
+													</div>
+												</li>
+
+												<li class="project-list-stats last">
+
+													<div class="projectstats">
+														<p class="widtha">
+															<strong>北京其它地区：</strong>
+														</p>
+														<p class="widthd">
+
+															<span id="voteItem_135638">94965</span>
+														</p>
+													</div>
+													<div class="projectpledgedwrap">
+														<div id="img_135638" class="projectpledged" style="width: 45%;"></div>
+														<div id="item_135638_per" class="baifens">45%</div>
+													</div>
+												</li>
+
+											</ul>
+										</div>
+										<div class="clear"></div>
+									</div>
+								</div>
+
+								<script src="http://app1.vote.cntv.cn/viewVoteAction.do?voteId=12834&amp;type=json" charset="UTF-8"></script>
+								<script language="javascript">
+									function applyVoteData(voteJsonData, barLength, barHeight, barImgUrl) {
+										var cities = voteJsonData.voteCities;
+										var voteItems = voteJsonData.voteItems;
+										var itemGroups = voteJsonData.itemGroups;
+										var voteTotalSumNum = voteJsonData.vote.voteNum;
+
+										var bigVotePeopleDoc = document.getElementById("total_Count");
+										if(bigVotePeopleDoc) {
+											bigVotePeopleDoc.innerHTML = voteJsonData.vote.votePeople;
+										}
+
+										for(var i = 0; i < voteItems.length; i++) {
+											var m_item = voteItems[i];
+											var itemNumDocId = "voteItem_" + m_item.id;
+											var itemNumDoc = document.getElementById(itemNumDocId);
+											if(itemNumDoc) {
+												itemNumDoc.innerHTML = m_item.voteNum;
+											}
+										}
+
+										for(var i = 0; i < itemGroups.length; i++) {
+											var groupSumNum = 0;
+											for(var k = 0; k < voteItems.length; k++) {
+												if(itemGroups[i].groupId == voteItems[k].groupId) {
+													groupSumNum += voteItems[k].voteNum;
+												}
+											}
+											var groupNumDocId = "group_" + itemGroups[i].groupId + "_Num";
+											var groupPerDocId = "group_" + itemGroups[i].groupId + "_Per";
+											var groupBarDocId = "group_" + itemGroups[i].groupId + "_Bar";
+											var groupNumDoc = document.getElementById(groupNumDocId);
+											var groupPerDoc = document.getElementById(groupPerDocId);
+											var groupBarDoc = document.getElementById(groupBarDocId);
+											if(groupNumDoc) {
+												groupNumDoc.innerHTML = groupSumNum;
+											}
+											if(voteTotalSumNum == 0) {
+												voteTotalSumNum = 1;
+											}
+											if(groupPerDoc) {
+												groupPerDoc.innerHTML = (groupSumNum / voteTotalSumNum * 100).toFixed("0") + "%";
+											}
+											if(groupBarDoc) {
+												groupBarDoc.style.width = (groupSumNum / voteTotalSumNum * 100).toFixed("0") + "%";
+											}
+											if(groupSumNum == 0) {
+												groupSumNum = 1;
+											}
+											for(var j = 0; j < voteItems.length; j++) {
+												if(itemGroups[i].groupId == voteItems[j].groupId) {
+													var itemPerDocId = "item_" + voteItems[j].id + "_per";
+													var itemPerDoc = document.getElementById(itemPerDocId);
+													if(itemPerDoc) {
+														itemPerDoc.innerHTML = (100 * voteItems[j].voteNum / groupSumNum).toFixed("0") + "%";
+
+													}
+													var imgDocId = "img_" + voteItems[j].id;
+													var imgDoc = document.getElementById(imgDocId);
+													if(imgDoc) {
+														imgDoc.style.width = (voteItems[j].voteNum / groupSumNum * 100).toFixed("0") + "%";
+
+													}
+												}
+											}
+
+										}
+
+										delete voteJsonData;
+									}
+									applyVoteData(voteJson12834, 239, "17px", "http://p3.img.cctvpic.com/votepic/2010/2/1268113575438.gif");
+								</script>
+
+							</div>
+						</div>
+					</div>
+
+					<div style="clear:both;"></div>
+				</div>
+				<div class="md_ftc"></div>
+			</div>
+			<div class="hide"></div>
+		</div>
+	</body>
+
+</html>

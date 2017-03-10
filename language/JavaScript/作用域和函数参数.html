@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+	</head>
+	<body>
+		<script type="text/javascript">
+			//参考链接
+			//js中的arguments,apply,call,callee,caller
+			//http://www.cnblogs.com/ForFreeDom/archive/2010/03/24/1693547.html
+			
+			//arguments记录了函数被调用时传入的所有的参数，数量不受函数定义时的形参的限制
+			//arguments看起来像数组，但其实并不是argument.length也不会随着参数的个数自动变化
+			function func1(a,b,c){
+				console.log(arguments);
+			}
+			func1("a","b","c","d","e");
+			
+			//arguments.callee.caller调用当前函数的函数
+			function func2(){
+				console.log(func2.caller);
+				console.log(arguments.callee.caller);
+			}
+			function func3(){
+				func2();
+			}
+			func3();
+			
+			//arguments.callee返回函数本身
+			//arguments.callee.length参数的数量
+			function func4(){
+				console.log(arguments.callee);
+				console.log(arguments.callee.length);
+			}
+			func4();
+			
+			//call,apply函数的作用相同，但参数的传递方式不同
+			function base(member) {
+			    this.member = member;
+			}
+			function extend(){
+			    base.call(this,"dnnsun_Member");
+			    base.apply(this,["gre"]);
+			    window.alert(member);
+			}
+			extend();
+			//apply使在函数中将参数全传给另一个函数更加方便
+			function func1(mess,from){
+				alert("say:"+mess+"  from:"+from);
+			}
+			function func2(mess,from){
+				func1.apply(this,arguments);
+			}
+			func2("hello word","diw");
+			
+			
+			
+			/*JavaScript scope
+			 * 相关链接：https://my.oschina.net/bgmemo/blog/195761  干货！你一直想知道的关于JavaScript scope的一切
+			 * 
+			 * 概念：
+			 * 域（scope）
+			 * 闭包（closure）
+			 * 关键字this
+			 * 命名空间（namespace）
+			 * 函数域（function scope）
+			 * 全局域（global scope）
+			 * 词法作用域（lexical scope）
+			 * 公共域和私有域（public/private scope）
+			 */
+			
+			//self和this
+			this;//指代当前的域
+			self===window.self;//意为当前窗口
+			//但是通常使用
+			var self=this;//保存当前的上下文
+			
+			
+			//函数内部默认的域是Global，即使这个函数是在一个对象的方法内部定义的
+			//要修改函数的域，需要将这个函数作为一个对象的方法，或者使用call,apply,bind等函数
+			//在域内可以调用域外部的变量和函数，在外部调用不到域内部
+			
+			
+			//.call()和.apply()函数，用来在另一个域中运行函数
+			//.bind()用来在函数运行之前绑定一个域,bind方法会创建一个新函数,称为绑定函数.当调用这个绑定函数时,绑定函数会以创建它时传入bind方法的第一个参数作为this,传入bind方法的第二个以及以后的参数加上绑定函数运行时本身的参数按照顺序作为原函数的参数来调用原函数.
+			
+			
+			//例如：
+			var obj1={
+				name:"obj1",
+				func:function(callback){
+					console.log(this);
+					console.log(self);
+					callback.call(this);
+					console.dir(callback);
+				}
+			};
+			var obj2={
+				func:function(){
+					var self=this;
+					obj1.func(function(){
+						console.log(this);
+						console.log(self);
+					});
+				}
+			};
+			obj2.func();
+			
+			
+			
+			
+			var obj={};
+			obj.str="2333";
+			obj.fun=function(){
+				console.log(this.str);
+			}
+			obj.fun();//正常调用
+			
+			with(obj){
+				fun();//使用with后，默认的对象（或者是域），从window变成with调用的对象
+				this.fun();//使用with，并不会改变this所指对象
+				function fun(){
+					alert("2ddwd");
+				}
+				function fun2(){
+					alert("2ddwd");
+				}
+				console.dir(fun);//首先查找with调用的对象，如果其中没有，才查找this所指的对象
+				console.dir(fun2);
+			}
+			//with是运行缓慢的代码块，不推荐使用
+		</script>
+	</body>
+</html>
