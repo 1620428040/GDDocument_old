@@ -25,8 +25,8 @@
 }
 /*当通过picker选择输入的值的时候，用label代替input。这个类使label跟原来的input显示效果相同*/
 .picker-input{
-	padding-left: 0px;
+	padding-left: 0px !important;
 	height: 40px;
 	margin: 0px;
-	width: 65%;
+	width: 65% !important;
 }

@@ -5,9 +5,9 @@
  * 这次修改，希望能使用MVC设计模式，将原来的代码解构，并且实现只替换View部分就能适应不同的UI框架
  * 
  * 依赖关系
- * 需要jQuery
- * 当前的View部分需要jQuery、MUI框架，需要导入自定义的css样式表
- * 时间选择器需要mui.picker.min.js(js/css)
+ * 基础功能只需要jQuery
+ * 样式需要导入对应的css样式表
+ * 
  */
 
 //================================================================
@@ -275,7 +275,7 @@ DataMagic.DataType.Base = Class.inherit("基础数据类型", function(fieldName
 		this.field.createSearchField(this.fieldName, this.fieldMeta, null);
 		return this.field;
 	},
-	validationSearchParams: function(value, input) {
+	validationSearchParams: function(value,input) {
 		var validated = (value === null) ? true : this.typeValidation(value);
 		if(validated) {
 			this.field.hideMistake(input);
@@ -490,7 +490,9 @@ DataMagic.Model = Class.inherit("基础model", function(name, storage, host, con
 					return;
 				}
 				try {
-					data = JSON.parse(data);
+					if(typeof data==="string"){
+						data = JSON.parse(data);
+					}
 					if(data.status === "error") {
 						console.error(data.reason);
 						return;
@@ -505,6 +507,34 @@ DataMagic.Model = Class.inherit("基础model", function(name, storage, host, con
 				DataMagic.ajaxStop();
 			}
 		});
+
+
+//		$.ajax({
+//			type: "get",
+//			url: url,
+//			async: true,
+//			cache:false,
+//			data: params,
+//			dataType:'jsonp',
+//			success: function(data,status,xhr) {
+//				if(data == null || data === "") {
+//					console.error("服务器返回的内容为空");
+//					return;
+//				}
+//				try {
+//					if(data.status === "error") {
+//						console.error(data.reason);
+//						return;
+//					}
+//				} catch(e) {
+//					console.error("解析数据失败:" + e);
+//				}
+//				callback(data);
+//			},
+//			complete:function(xhr,status){
+//				DataMagic.ajaxStop();
+//			}
+//		});
 	}
 }, {
 	//设置服务器为标准的接口
@@ -783,7 +813,7 @@ DataMagic.Controller = Class.inherit("基础控制器", function(name, storage, 
 			}
 			validated = kv.dataType.validated && validated;
 			if(!validated) {
-				DataMagic.dialog(kn);
+//				DataMagic.dialog(kn);
 			}
 		}
 		if(!validated) {
@@ -904,42 +934,20 @@ DataMagic.Field.Abstract = DataMagic.View.Abstract.inherit("输入框的抽象�
 	setValue: Function.abstract, //设置值
 	getValue: Function.abstract, //获取值
 	createField: function(name, meta, data) {}, //创建输入框
+	//创建搜索框
 	createSearchField: function(name, meta, data) {
 		this.createField(name, meta, data);
-	}, //创建搜索框
+	},
 	showMistake: Function.abstract, //显示错误标记
-	hideMistake: Function.abstract //隐藏错误标记
+	hideMistake: Function.abstract, //隐藏错误标记
+	onInputClicked:function(input){}//输入框被点击
 });
 DataMagic.DataType.Base.prototype.inputField = DataMagic.Field.Abstract; //注册为Base类型数据的输入框
 
 //================================================================
-//DataMagic-base
-//只使用jQuery的情况下，剔除掉mui相关的代码，从而实现在电脑端浏览器上使用
-//以下部分是UI方面的代码，负责显示，可以根据UI框架的不同替换
+//视图部分
+//只使用jQuery的情况下，实现对页面元素的操作逻辑，只有基本的样式
 //================================================================
-DataMagic.initViewWithMeta = function(meta) {
-	$(".mui-title").html(meta.describe);
-}
-DataMagic.dialog = function(mess) {
-	mui.toast(mess);
-}
-DataMagic.alert = function(mess) {
-	mui.alert(mess);
-}
-//当发送ajax请求时，显示一个进度条
-DataMagic.ajaxSend=function(){
-	var progressbar = mui('body').progressbar();
-	if(progressbar.show) {
-		progressbar.show();
-	} else {
-		$(function() {
-			mui('body').progressbar().show();
-		});
-	}
-}
-DataMagic.ajaxStop=function(){
-	mui('body').progressbar().hide();
-}
 
 /*view类的基类*/
 DataMagic.View.Base = DataMagic.View.Abstract.inherit("视图类的基类", null, null, {
@@ -962,7 +970,7 @@ DataMagic.View.Base = DataMagic.View.Abstract.inherit("视图类的基类", null
 
 /*工具栏类*/
 DataMagic.View.Toolbar = DataMagic.View.Base.inherit("工具栏类", null, null, {
-	executeEvent:"tap",//当发生什么事件时，触发操作，在手机版上是"tap"，在电脑版上是"click"
+	executeEvent:"click",//当发生什么事件时，触发操作，在手机版上是"tap"，在电脑版上是"click"
 	buttonPoor: {},
 	onDOMLoad: function() {
 		this.container = $(".DMToolbar");
@@ -978,15 +986,15 @@ DataMagic.View.Toolbar = DataMagic.View.Base.inherit("工具栏类", null, null,
 		for(var i in buttons) {
 			var self = this;
 			var command = buttons[i];
-			var button=this.buttonPoor[command]||this.createButton(command);
+			var button=this.buttonPoor[command]||this.buildButton(command);
 			button.appendTo(this.container);
 			button[0].addEventListener(this.executeEvent, function() {
 				self.controller.execute($(this).data("command"));
 			});
 		}
 	},
-	createButton: function(command) {
-		return $('<a class="mui-tab-item DMButton" data-command="' + command + '"><span class="mui-icon mui-icon-plus"></span><span class="mui-tab-label">' + command + '</span></a>');
+	buildButton: function(command) {
+		return $('<a class="DMButton" data-command="' + command + '"><span>' + command + '</span></a>');
 	}
 });
 
@@ -999,7 +1007,7 @@ DataMagic.View.List = DataMagic.View.Base.inherit("列表类", null, null, {
 		this.container = $(".DMList");
 		this.item = this.container.find(".DMItem").detach();
 		if(this.item.length === 0) {
-			this.item = this.initItem(this, dm.meta.fieldList);
+			this.item = this.buildItem();
 		}
 		var self = this;
 		this.item.click(function(ev) {
@@ -1010,6 +1018,13 @@ DataMagic.View.List = DataMagic.View.Base.inherit("列表类", null, null, {
 			$(this).addClass("selected");
 			self.controller.browse();
 		});
+	},
+	buildItem:function(){
+		return $('<li class="DMItem">'
+			+'<div><span data-field="title"></span></div>'
+			+'<div style="font-size: 14px;color: gray;font-family: kaiti;">'
+			+'<span data-field="people"></span>'
+			+'<span data-field="date"></span></div></li>');
 	},
 	clearAll: function() {
 		this.container.find(".DMItem").remove();
@@ -1080,13 +1095,19 @@ DataMagic.View.Form = DataMagic.View.Base.inherit("表单类", null, null, {
  * input对应输入框
  */
 DataMagic.Field.Base = DataMagic.Field.Abstract.inherit("输入框的基类", null, null, {
+	buildField: function(name, meta, data) {
+		return $('<div><label for="' + name + '">' + meta.title + '</label><input class="DMInput" type="text" id="' + name + '"/></div>');
+	},
 	createField: function(name, meta, data) {
-		this.container = $('<div class="mui-input-row"><label for="' + name + '">' + meta.title + '</label></div>');
-		this.input = $('<input class="mui-input-clear" type="text" id="' + name + '"/>').appendTo(this.container);
+		this.container = this.buildField(name,meta,data);
+		this.input=this.container.find(".DMInput");
 		this.setValue(this.input, data);
 		var self = this;
-		this.input.change(function() {
-			self.dataType.validationValue(self.getValue(self.input), self.input);
+		this.input.change(function(){
+			this.dataType.validationValue(self.getValue(this.input),this.input);
+		});
+		this.input.click(function(){
+			self.onInputClicked($(this));
 		});
 	},
 	setValue: function(input, value) {
@@ -1110,14 +1131,8 @@ DataMagic.DataType.Base.prototype.inputField = DataMagic.Field.Base;
 
 /*长文本输入框*/
 DataMagic.Field.LongText = DataMagic.Field.Base.inherit("长文本输入框", null, null, {
-	createField: function(name, meta, data) {
-		this.container = $('<div class="mui-input-row" style="height: 120px;"><label for="' + name + '">' + meta.title + '</label></div>');
-		this.input = $('<textarea id="' + name + '" rows="5" placeholder="' + meta.title + '"></textarea>').appendTo(this.container);
-		this.setValue(this.input, data);
-		var self = this;
-		this.input.change(function() {
-			self.dataType.validationValue(self.getValue(self.input), self.input);
-		});
+	buildField: function(name, meta, data) {
+		return $('<div style="height: 120px;"><label for="' + name + '">' + meta.title + '</label><textarea id="' + name + '" class="DMInput" rows="5" placeholder="' + meta.title + '"></textarea></div>');
 	}
 });
 DataMagic.DataType.LongText.prototype.inputField = DataMagic.Field.LongText;
@@ -1131,12 +1146,14 @@ DataMagic.DataType.LongText.prototype.inputField = DataMagic.Field.LongText;
  * minInput/maxInput在搜索状态下，输入最小值和最大值的输入框（数字类型及其子类）
  */
 DataMagic.Field.Number = DataMagic.Field.Base.inherit("数字类型的输入框", null, null, {
+	buildSearchField:function(name, meta, data){
+		return $('<div><label for="' + name + '">' + meta.title +
+			'</label><input class="DMInput" type="text" id="' +name + '"/></div><div><label>' +
+			'</label><input class="DMInput" type="text"/></div>');
+	},
 	createSearchField: function(name, meta, data) {
-		this.container = $('<div class="mui-input-row"><label for="' + name + '">' + meta.title +
-			'</label><input class="mui-input-clear" type="text" id="' +
-			name + '"/></div><div class="mui-input-row"><label>' +
-			'</label><input class="mui-input-clear" type="text"/></div>');
-		this.inputs = this.container.find("input");
+		this.container = this.buildSearchField(name, meta, data);
+		this.inputs = this.container.find(".DMInput");
 		this.minInput = this.inputs.eq(0);
 		this.maxInput = this.inputs.eq(1);
 		var self = this;
@@ -1144,9 +1161,14 @@ DataMagic.Field.Number = DataMagic.Field.Base.inherit("数字类型的输入框"
 			var jq = $(this);
 			self.dataType.validationSearchParams(self.getValue(jq), jq);
 		});
+		this.inputs.click(function() {
+			var jq = $(this);
+			self.onInputClicked(jq);
+		});
 	}
 });
 DataMagic.DataType.Number.prototype.inputField = DataMagic.Field.Number;
+
 
 //================================================================
 //以下部分是方便测试用的函数
@@ -1170,6 +1192,12 @@ function fill() {
 		"file_name": "ergre"
 	}
 	for(var kn in data) {
-		$('[id=' + kn + ']').val(data[kn]);
+		var node = $('[id=' + kn + ']');
+		if(node.is("input")||node.is("textarea")){
+			node.val(data[kn]);
+		}
+		else{
+			node.text(data[kn]);
+		}
 	}
 }
