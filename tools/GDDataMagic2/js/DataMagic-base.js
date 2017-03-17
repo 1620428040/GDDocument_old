@@ -19,7 +19,7 @@ if(!Object.create) {
 	Object.create = function(parentPrototype) {
 		var empty = function() {}
 		empty.prototype = parentPrototype;
-		return new Function.empty();
+		return new empty();
 	}
 }
 
@@ -82,9 +82,14 @@ Class.toString = function() {
 Class.prototype.toString = function() {
 	return this.getClass().toString() + " 的实例";
 }
-//获取当前实例所在的类
+//获取当前实例所在的类;不能兼容ie8
 Class.prototype.getClass = function() {
-	return Object.getPrototypeOf(this).constructor;
+	if(Object.getPrototypeOf){
+		return Object.getPrototypeOf(this).constructor;
+	}
+	else{
+		return "当前浏览器不支持获取原型";
+	}
 }
 
 /* Date.prototype.format	将 Date 转化为指定格式的String
@@ -261,6 +266,7 @@ DataMagic.DataType.Base = Class.inherit("基础数据类型", function(fieldName
 		} else {
 			this.field.showMistake(input);
 		}
+		console.log("类型检查  value:"+value+"  validated:"+validated);
 		return validated;
 	},
 	getValue: function() {
@@ -354,7 +360,7 @@ DataMagic.DataType.DateTime = DataMagic.DataType.Date.inherit("日期加时间�
  * any 当进行搜索时，表示任意选项的字符串
  */
 DataMagic.DataType.Select = DataMagic.DataType.Base.inherit("单选数据类型", function(fieldName, fieldMeta) {
-	this.getClass().base.call(this, fieldName, fieldMeta);
+	DataMagic.DataType.Base.apply(this,arguments);
 	this.options = {};
 	this.any = "任意";
 	var titles = [];
@@ -419,7 +425,7 @@ DataMagic.DataType.Multiple = DataMagic.DataType.Select.inherit("多选数据类
 /*布尔类型*/
 DataMagic.DataType.Bool = DataMagic.DataType.Select.inherit("布尔数据类型", function(fieldName, fieldMeta) {
 	DataMagic.DataType.Base.call(this, fieldName, fieldMeta);
-	this.options = { "0": "是", "1": "否" };
+	this.options = { "0": "否", "1": "是" };
 	this.any = "任意";
 }, null, {
 	typeValidation: function(value) {
@@ -478,50 +484,22 @@ DataMagic.Model = Class.inherit("基础model", function(name, storage, host, con
 			return;
 		}
 		DataMagic.ajaxSend(params);
-		$.ajax({
-			type: "post",
-			url: url,
-			async: true,
-			cache:false,
-			data: params,
-			success: function(data,status,xhr) {
-				if(data == null || data === "") {
-					console.error("服务器返回的内容为空");
-					return;
-				}
-				try {
-					if(typeof data==="string"){
-						data = JSON.parse(data);
-					}
-					if(data.status === "error") {
-						console.error(data.reason);
-						return;
-					}
-				} catch(e) {
-					console.error("解析数据失败:" + e);
-				}
-				callback(data);
-			},
-			crossDomain: true,
-			complete:function(xhr,status){
-				DataMagic.ajaxStop();
-			}
-		});
-
-
+		
 //		$.ajax({
-//			type: "get",
+//			type: "post",
 //			url: url,
 //			async: true,
 //			cache:false,
 //			data: params,
-//			dataType:'jsonp',
 //			success: function(data,status,xhr) {
 //				if(data == null || data === "") {
 //					console.error("服务器返回的内容为空");
 //					return;
 //				}
 //				try {
+//					if(typeof data==="string"){
+//						data = JSON.parse(data);
+//					}
 //					if(data.status === "error") {
 //						console.error(data.reason);
 //						return;
@@ -531,10 +509,39 @@ DataMagic.Model = Class.inherit("基础model", function(name, storage, host, con
 //				}
 //				callback(data);
 //			},
+//			crossDomain: true,
 //			complete:function(xhr,status){
 //				DataMagic.ajaxStop();
 //			}
 //		});
+
+
+		$.ajax({
+			type: "get",
+			url: url,
+			async: true,
+			cache:false,
+			data: params,
+			dataType:'jsonp',
+			success: function(data,status,xhr) {
+				if(data == null || data === "") {
+					console.error("服务器返回的内容为空");
+					return;
+				}
+				try {
+					if(data.status === "error") {
+						console.error(data.reason);
+						return;
+					}
+				} catch(e) {
+					console.error("解析数据失败:" + e);
+				}
+				callback(data);
+			},
+			complete:function(xhr,status){
+				DataMagic.ajaxStop();
+			}
+		});
 	}
 }, {
 	//设置服务器为标准的接口
@@ -650,7 +657,7 @@ DataMagic.Model = Class.inherit("基础model", function(name, storage, host, con
 		});
 	},
 	//删除若干条数据，data指要删除的数据的索引组成的数组;callback是回调函数，参数是被删除的ID
-	delete: function(ids, callback) {
+	deleteItems: function(ids, callback) {
 		var self = this;
 		this.request(this.getServerUrl("delete"), { where: { id: ids } }, function(result) {
 			for(var i in ids) {
@@ -723,7 +730,7 @@ DataMagic.Controller = Class.inherit("基础控制器", function(name, storage, 
 	},
 	onMetaLoad: function() {
 		console.log("meta加载完成");
-		if(document.readyState === "complete") {
+		if(document.readyState === "interactive" || document.readyState === "complete") {
 			this.initViewWithMeta();
 		}
 	},
@@ -745,7 +752,7 @@ DataMagic.Controller = Class.inherit("基础控制器", function(name, storage, 
 				this.list.insert(this.model.data);
 			}
 		}
-		this.toolbar.refresh(this.model.meta.feature);
+		this.toolbar.refresh(this.model.meta.tools);
 		if(this.onReady) {
 			this.onReady();
 		}
@@ -760,6 +767,8 @@ DataMagic.Controller = Class.inherit("基础控制器", function(name, storage, 
 	},
 	/*控制表单*/
 	showForm: function(mode, data) {
+		console.log("显示表单");
+		console.log(data);
 		this.form.mode = mode;
 		this.form.clearAll();
 		if(mode === "insert") {
@@ -827,6 +836,9 @@ DataMagic.Controller = Class.inherit("基础控制器", function(name, storage, 
 		if(result == null) {
 			return;
 		}
+		console.log("获取表单的值");
+		console.log(result);
+		
 		delete result.id;
 
 		var self = this;
@@ -848,7 +860,7 @@ DataMagic.Controller = Class.inherit("基础控制器", function(name, storage, 
 		this.cancel();
 	},
 	cancel: function() {
-		this.toolbar.refresh(this.model.meta.feature);
+		this.toolbar.refresh(this.model.meta.tools);
 		this.list.show();
 		this.form.hide();
 	},
@@ -858,14 +870,14 @@ DataMagic.Controller = Class.inherit("基础控制器", function(name, storage, 
 		this.showForm("insert");
 		this.toolbar.refresh(["save", "cancel"]);
 	},
-	delete: function() {
+	deleteItems: function() {
 		var cells = this.list.getSelectedItems(true);
 		if(cells.length == 0) {
 			DataMagic.dialog("至少选择一条数据");
 		} else {
 			var ids = this.list.getIDWithItems(cells);
 			var self = this;
-			this.model.delete(ids, function() {
+			this.model.deleteItems(ids, function() {
 				self.list.remove(cells);
 			});
 		}
@@ -986,9 +998,12 @@ DataMagic.View.Toolbar = DataMagic.View.Base.inherit("工具栏类", null, null,
 		for(var i in buttons) {
 			var self = this;
 			var command = buttons[i];
+			if(command==="delete"){
+				command="deleteItems";
+			}
 			var button=this.buttonPoor[command]||this.buildButton(command);
 			button.appendTo(this.container);
-			button[0].addEventListener(this.executeEvent, function() {
+			button.on(this.executeEvent,function() {
 				self.controller.execute($(this).data("command"));
 			});
 		}
@@ -1102,11 +1117,15 @@ DataMagic.Field.Base = DataMagic.Field.Abstract.inherit("输入框的基类", nu
 		this.container = this.buildField(name,meta,data);
 		this.input=this.container.find(".DMInput");
 		this.setValue(this.input, data);
+		this.listenInputChange(this.input);
+	},
+	listenInputChange:function(input){
 		var self = this;
-		this.input.change(function(){
-			this.dataType.validationValue(self.getValue(this.input),this.input);
+		input.change(function(){
+			var jq=$(this);
+			self.dataType.validationValue(self.getValue(jq),jq);
 		});
-		this.input.click(function(){
+		input.click(function(){
 			self.onInputClicked($(this));
 		});
 	},
@@ -1156,15 +1175,7 @@ DataMagic.Field.Number = DataMagic.Field.Base.inherit("数字类型的输入框"
 		this.inputs = this.container.find(".DMInput");
 		this.minInput = this.inputs.eq(0);
 		this.maxInput = this.inputs.eq(1);
-		var self = this;
-		this.inputs.change(function() {
-			var jq = $(this);
-			self.dataType.validationSearchParams(self.getValue(jq), jq);
-		});
-		this.inputs.click(function() {
-			var jq = $(this);
-			self.onInputClicked(jq);
-		});
+		this.listenInputChange(this.inputs);
 	}
 });
 DataMagic.DataType.Number.prototype.inputField = DataMagic.Field.Number;

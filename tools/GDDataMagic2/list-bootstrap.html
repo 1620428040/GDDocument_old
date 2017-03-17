@@ -3,49 +3,34 @@
 	<head>
 		<meta charset="UTF-8">
 		<title>基本的列表页面</title>
-		<script src="js/jquery-3.0.0.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/jquery-1.9.1.min.js" type="text/javascript" charset="utf-8"></script>
 		<script src="js/DataMagic-base.js" type="text/javascript" charset="utf-8"></script>
 		
 		<!--引用bootstrap框架中的文件和适配bootstrap的view部分-->
 		<link rel="stylesheet" type="text/css" href="view/bootstrap/bootstrap/css/bootstrap.min.css"/>
 		<script src="view/bootstrap/bootstrap/js/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
+		<link rel="stylesheet" type="text/css" href="view/bootstrap/bootstrap/bootstrap-datetimepicker.min.css"/>
+		<script src="view/bootstrap/bootstrap/bootstrap-datetimepicker.min.js" type="text/javascript" charset="utf-8"></script>
 		<script src="view/bootstrap/DataMagic.bootstrap.js" type="text/javascript" charset="utf-8"></script>
 		<link rel="stylesheet" type="text/css" href="view/bootstrap/DataMagic.bootstrap.css"/>
 		
 		<script type="text/javascript">
-			DataMagic.initViewWithMeta=function(meta){
-				$(".panel-title").html(meta.describe);
-			}
-			DataMagic.Field.Base.prototype.buildField=function(name, meta, data) {
-				return $('<div class="form-group"><label for="' + name + '">' + meta.title + '</label><input class="form-control DMInput" type="text" id="' + name + '" placeholder="' + meta.title + '"/></div>');
-			}
-			DataMagic.Field.LongText.prototype.buildField=function(name, meta, data) {
-				return $('<div class="form-group"><label for="' + name + '">' + meta.title + '</label><textarea id="' + name + '" class="form-control DMInput" rows="5" placeholder="' + meta.title + '"></textarea></div>');
-			}
-			DataMagic.Field.Number.prototype.buildSearchField=function(name, meta, data){
-				return $('<div class="form-group"><label for="' + name + '">' + meta.title +
-					'</label><span class="input-group-addon">最小</span><input class="form-control DMInput" type="text" id="' +
-					name + '"/><label>' +
-					'</label><span class="input-group-addon">最大</span><input class="form-control DMInput" type="text"/></div>');
-			}
-			var duty=new DataMagic.Controller("duty",sessionStorage,"http://192.168.1.3:81/bgmobile/SeparateModule/DataMagic2.php");
+			var duty=new DataMagic.Controller("duty",sessionStorage,"php/DataMagic2.php");
 		</script>
 		<style type="text/css">
 			
 		</style>
 	</head>
 	<body>
-		<div class="col-md-4">
+		<div class="col-md-6">
 			<div class="panel panel-primary">
 			    <div class="panel-heading">
-			        <h3 class="panel-title">
-			         	biaoti
-			        </h3>
+			        <h3 class="panel-title">标题</h3>
 			    </div>
 			    <div class="panel-body">
 					<ul class="list-group DMList">
 						<li class="list-group-item DMItem">
-							<span class="badge">新</span>
+							<!--span class="badge">新</span>-->
 							<div>
 								<span data-field="title"></span>
 							</div>
@@ -61,7 +46,7 @@
 			    	<div class="btn-group DMToolbar">
 						<a class="btn btn-default DMButton" data-command="browse"><span>浏览</span></a>
 						<a class="btn btn-default DMButton" data-command="insert"><span>新建</span></a>
-						<a class="btn btn-default DMButton" data-command="delete"><span>删除</span></a>
+						<a class="btn btn-default DMButton" data-command="deleteItems"><span>删除</span></a>
 						<a class="btn btn-default DMButton" data-command="update"><span>修改</span></a>
 						<a class="btn btn-default DMButton" data-command="search"><span>查找</span></a>
 						<a class="btn btn-default DMButton" data-command="save"><span>确认</span></a>

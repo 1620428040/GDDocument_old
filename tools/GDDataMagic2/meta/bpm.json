@@ -3,7 +3,7 @@
 	"bindTable": "bpm_task",
 	"primaryFields": "id",
 	"handler":"DataMagicInterim",
-	"feature": [
+	"tools": [
 		"browse",
 		"search",
 		"refresh"

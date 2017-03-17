@@ -2,7 +2,7 @@
 	"describe": "消息",
 	"bindTable": "oa_msg",
 	"primaryFields": "id",
-	"feature": [
+	"tools": [
 		"browse",
 		"delete",
 		"search",

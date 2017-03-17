@@ -2,7 +2,7 @@
 	"describe": "印章管理",
 	"bindTable": "oa_stamp_log",
 	"primaryFields": "id",
-	"feature": [
+	"tools": [
 		"browse",
 		"search",
 		"refresh"

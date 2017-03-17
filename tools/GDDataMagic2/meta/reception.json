@@ -2,7 +2,7 @@
 	"describe":"接待管理",
 	"bindTable":"reception",
 	"primaryFields":"id",
-	"feature":["insert","delete","update","search","refresh"],
+	"tools":["insert","delete","update","search","refresh"],
 	"alias":{
 		"people":"personnel",
 		"title":"details",

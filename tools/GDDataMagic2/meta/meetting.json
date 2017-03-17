@@ -2,7 +2,7 @@
 	"describe":"会议管理",
 	"bindTable":"oa_officemeetting_info",
 	"primaryFields":"id",
-	"feature":["search","refresh"],
+	"tools":["search","refresh"],
 	"alias":{
 		"people":"meetting_people_name",
 		"title":"meetting_name",

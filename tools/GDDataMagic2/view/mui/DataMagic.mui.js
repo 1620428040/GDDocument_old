@@ -36,15 +36,15 @@ DataMagic.View.List.prototype.buildItem=function(){
 		+'<span data-field="date" class="mui-pull-right"></span></div></li>');
 }
 DataMagic.Field.Base.prototype.buildField=function(name, meta, data) {
-	return $('<div class="mui-input-row"><label for="' + name + '">' + meta.title + '</label><input class="mui-input-clear DMInput" type="text" id="' + name + '"/></div>');
+	return $('<div class="mui-input-row"><label for="' + name + '">' + meta.title + '</label><input class="mui-input-clear DMInput" type="text" id="' + name + '" placeholder="' + (meta.describe||"") + '"/></div>');
 }
 DataMagic.Field.LongText.prototype.buildField=function(name, meta, data) {
-	return $('<div class="mui-input-row" style="height: 120px;"><label for="' + name + '">' + meta.title + '</label><textarea id="' + name + '" class="DMInput" rows="5" placeholder="' + meta.title + '"></textarea></div>');
+	return $('<div class="mui-input-row" style="height: 120px;"><label for="' + name + '">' + (meta.describe||"") + '</label><textarea id="' + name + '" class="DMInput" rows="5" placeholder="' + (meta.describe||"") + '"></textarea></div>');
 }
 DataMagic.Field.Number.prototype.buildSearchField=function(name, meta, data){
 	return $('<div class="mui-input-row"><label for="' + name + '">' + meta.title +
 		'</label><input class="mui-input-clear DMInput" type="text" id="' +
-		name + '"/></div><div class="mui-input-row"><label>' +
+		name + '" placeholder="' + (meta.describe||"") + '"/></div><div class="mui-input-row"><label>' +
 		'</label><input class="mui-input-clear DMInput" type="text"/></div>');
 }
 
@@ -155,9 +155,9 @@ DataMagic.Field.Select = DataMagic.Field.Date.inherit("单选类型的输入框"
 		mui("#popover-select").popover("hide");
 	},
 	createSearchField: function(name, meta, data) {
-		this.options = $.extend({}, this.dataType.options);
 		this.options[-1] = this.dataType.any;
 		this.createField(name, meta, data);
+		delete this.options[-1];
 	}
 });
 DataMagic.DataType.Select.prototype.inputField = DataMagic.Field.Select;

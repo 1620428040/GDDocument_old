@@ -2,7 +2,7 @@
 	"describe": "考试结果",
 	"bindTable": "questionscore",
 	"primaryFields": "id",
-	"feature": [
+	"tools": [
 		"browse",
 		"search",
 		"refresh"

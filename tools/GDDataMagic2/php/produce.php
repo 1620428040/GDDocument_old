@@ -46,7 +46,7 @@ function create($name,$tableName){
 		isset($meta["describe"])||$meta["describe"]=$tableInfo[0]["Comment"];
 		$meta["bindTable"]=$tableName;
 		$meta["primaryFields"]=null;
-		isset($meta["feature"])||$meta["feature"]=array("browse","delete","search","refresh");
+		isset($meta["tools"])||$meta["tools"]=array("browse","delete","search","refresh");
 		isset($meta["alias"])||$meta["alias"]=array("people"=>"","title"=>"","date"=>"");
 		isset($meta["fieldList"])||$meta["fieldList"]=array();
 		

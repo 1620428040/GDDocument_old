@@ -2,7 +2,7 @@
 	"describe": "员工培训",
 	"bindTable": "oa_hr_train",
 	"primaryFields": "id",
-	"feature": [
+	"tools": [
 		"browse",
 		"insert",
 		"delete",

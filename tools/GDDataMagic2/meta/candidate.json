@@ -2,7 +2,7 @@
 	"describe": "候选人",
 	"bindTable": "oa_hr_candidate",
 	"primaryFields": "id",
-	"feature": [
+	"tools": [
 		"browse",
 		"delete",
 		"search",

@@ -2,7 +2,7 @@
 	"describe": "出差管理",
 	"bindTable": "oa_travel",
 	"primaryFields": "id",
-	"feature": [
+	"tools": [
 		"search",
 		"refresh"
 	],

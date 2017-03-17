@@ -2,7 +2,7 @@
 	"describe": "公告消息",
 	"bindTable": "oa_sys_notice",
 	"primaryFields": "id",
-	"feature": [
+	"tools": [
 		"browse",
 		"delete",
 		"search",

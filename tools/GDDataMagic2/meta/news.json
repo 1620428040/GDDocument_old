@@ -2,7 +2,7 @@
 	"describe":"新闻",
 	"bindTable":"oa_news",
 	"primaryFields":"id",
-	"feature":["browse","refresh"],
+	"tools":["browse","refresh"],
 	"urls":{
 	},
 	"alias":{

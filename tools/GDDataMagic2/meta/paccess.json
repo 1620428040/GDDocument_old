@@ -2,7 +2,7 @@
 	"describe":"上访管理",
 	"bindTable":"oa_p_access",
 	"primaryFields":"id",
-	"feature":["insert","delete","update","search","refresh"],
+	"tools":["insert","delete","update","search","refresh"],
 	"alias":{
 		"people":"visitor_name",
 		"title":"title",

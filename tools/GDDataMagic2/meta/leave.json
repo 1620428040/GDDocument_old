@@ -2,7 +2,7 @@
 	"describe": "假事管理",
 	"bindTable": "oa_noteforleave",
 	"primaryFields": "id",
-	"feature": [
+	"tools": [
 		"search",
 		"refresh"
 	],

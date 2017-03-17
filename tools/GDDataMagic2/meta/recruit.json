@@ -2,7 +2,7 @@
 	"describe": "招聘管理",
 	"bindTable": "oa_hr_recruit",
 	"primaryFields": "id",
-	"feature": [
+	"tools": [
 		"browse",
 		"delete",
 		"search",

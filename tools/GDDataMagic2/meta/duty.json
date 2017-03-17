@@ -3,7 +3,7 @@
 	"bindTable":"oa_duty",
 	"primaryFields":"id",
 	"handler":"DataMagicInterim",
-	"feature":["browse","insert","delete","update","search","refresh"],
+	"tools":["browse","insert","delete","update","search","refresh"],
 	"alias":{
 		"title":"duty_name",
 		"people":"duty_username",

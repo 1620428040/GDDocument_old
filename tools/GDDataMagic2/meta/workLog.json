@@ -2,7 +2,7 @@
 	"describe": "工作记录",
 	"bindTable": "oa_work_log",
 	"primaryFields": "id",
-	"feature": [
+	"tools": [
 		"browse",
 		"delete",
 		"search",

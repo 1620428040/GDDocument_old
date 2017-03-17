@@ -4,18 +4,17 @@ header("Access-Control-Allow-Origin: *"); //允许的访问源：所有
 header("Access-Control-Allow-Headers:X-Requested-With");//允许的访问类型：ajax
 
 //导入设置信息
-require("../settings-local.php");
+//require("../settings-local.php");
+//或者定义常量
+define('SQL_HOST', '192.168.1.138');   // 数据库服务器地址
+define('SQL_DBNAME', 'bgmobile');    // 数据库名称
+define('SQL_USERNAME', 'root');    // 数据库用户账号
+define('SQL_PASSWORD', '123');    // 数据库用户密码
+define('SQL_CONNECTIONSTRING', 'mysql:dbname='.SQL_DBNAME.';host='.SQL_HOST);    // 数据库链接（依据上面自动生成，无需修改）
 
 //默认参数
 $name=isset($_REQUEST["name"]) ? $_REQUEST["name"] : "news";
 
-//$db=new MySQLClass(SQL_HOST,SQL_USERNAME,SQL_PASSWORD,SQL_DBNAME);
-////定义常量
-//define('SQL_HOST', '192.168.1.138');   // 数据库服务器地址
-//define('SQL_DBNAME', 'bgmobile');    // 数据库名称
-//define('SQL_USERNAME', 'root');    // 数据库用户账号
-//define('SQL_PASSWORD', '123');    // 数据库用户密码
-//define('SQL_CONNECTIONSTRING', 'mysql:dbname='.SQL_DBNAME.';host='.SQL_HOST);    // 数据库链接（依据上面自动生成，无需修改）
 
 $demo=array(
 	"default"=>array(),
@@ -47,7 +46,16 @@ $db=new PDO(SQL_CONNECTIONSTRING, SQL_USERNAME, SQL_PASSWORD);
 $magic=DataMagic::createDataMagic($name,$db);
 $magic->permission=array("person","oa_news");
 $data=$magic->shortcutOperate($_REQUEST);
-echo json_encode($data);
+
+//兼容jsonp协议
+$callback = $_REQUEST['callback'];
+if ($callback) {
+    header('Content-Type: text/javascript');
+    echo $callback . '(' . json_encode($data) . ');';
+} else {
+    header('Content-Type: application/x-json');
+    echo json_encode($data);
+}
 
 //基类
 class DataMagic{
@@ -79,7 +87,7 @@ class DataMagic{
 	}
 	static function getMeta($name){
 		//如果相应的meta文件存在，则直接读取文件
-		$path="meta/".$name.".json";
+		$path="../meta/".$name.".json";
 		$meta=null;
 //		echo $path."\n";
 //		if(self::defaultDataSource==="file"&&file_exists($path)){
@@ -247,7 +255,7 @@ class DataMagic{
 		$whereStr=array();
 		foreach($this->meta["fieldList"] as $key=>$value){
 			$whereItem=$where[$key];
-			if($whereItem){
+			if($whereItem!=null){
 				if($key==="id"){
 					$whereStr[]=$key."=".$whereItem;
 				}

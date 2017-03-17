@@ -19,7 +19,7 @@
 .illegal{
 	background-color: red;
 }
-#select-options .selected{
+.form-group .selected{
 	background-color: #00A0FF;
 	color: white;
 }
