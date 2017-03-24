@@ -1,5 +1,5 @@
 DataMagic.initViewWithMeta=function(meta){
-				$(".panel-title").html(meta.describe);
+	$(".DMTitle").html(meta.describe);
 }
 DataMagic.View.Toolbar.prototype.buildButton=function(command) {
 	return $('<a class="btn btn-default DMButton" data-command="'+command+'"><span>'+command+'</span></a>');
@@ -65,6 +65,13 @@ DataMagic.Field.Date = DataMagic.Field.Number.inherit("日期类型输入框", n
 			self.dataType.validationValue(self.getValue(jq),jq);
 		});
 		input.datetimepicker(this.option);
+	},
+	buildSearchField:function(name, meta, data){
+		return $('<div class="form-group"><label for="' + name + '">' + meta.title +
+			'</label><span class="input-group-addon">最早</span><input class="form-control DMInput" type="text" id="' +
+			name + '"/><label>' +
+			'</label><span class="input-group-addon">最晚</span><input class="form-control DMInput" type="text"/>'+
+			'<p class="help-block">' + (meta.describe||"") + '</p></div>');
 	}
 });
 DataMagic.DataType.Date.prototype.inputField = DataMagic.Field.Date;

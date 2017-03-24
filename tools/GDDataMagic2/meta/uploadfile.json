@@ -1,0 +1,149 @@
+{
+	"describe": "文件管理",
+	"bindTable": "oa_uploadfile",
+	"primaryFields": "id",
+	"tools": [
+		"browse",
+		"delete",
+		"search",
+		"refresh"
+	],
+	"alias": {
+		"people": "creator",
+		"title": "name",
+		"date": "filetime"
+	},
+	"fieldList": {
+		"id": {
+			"title": "",
+			"notNull": false,
+			"dataType": "int",
+			"maxlength": 11,
+			"type": "Number",
+			"hidden":true
+		},
+		"name": {
+			"title": "文件名",
+			"notNull": false,
+			"dataType": "varchar",
+			"maxlength": 256,
+			"type": "Base"
+		},
+		"creatorid": {
+			"title": "",
+			"notNull": false,
+			"dataType": "varchar",
+			"maxlength": 128,
+			"type": "LongText",
+			"hidden":true
+		},
+		"creator": {
+			"title": "创建者",
+			"notNull": false,
+			"type": "Base"
+		},
+		"filetime": {
+			"title": "时间",
+			"notNull": false,
+			"dataType": "int",
+			"maxlength": 11,
+			"type": "Date"
+		},
+		"createtime": {
+			"title": "",
+			"notNull": false,
+			"dataType": "int",
+			"maxlength": 11,
+			"type": "Date",
+			"hidden":true
+		},
+		"updatetime": {
+			"title": "",
+			"notNull": false,
+			"dataType": "int",
+			"maxlength": 11,
+			"type": "Date",
+			"hidden":true
+		},
+		"parentpath": {
+			"title": "类别",
+			"notNull": false,
+			"dataType": "varchar",
+			"maxlength": 1280,
+			"type": "Select",
+			"valueRange":"书记讲话,书记讲话;调研成果,调研成果;市委文件,市委文件;其他材料,其他材料"
+		},
+		"assign": {
+			"title": "交办",
+			"notNull": false,
+			"dataType": "varchar",
+			"maxlength": 50,
+			"type": "Base"
+		},
+		"handle": {
+			"title": "办理",
+			"notNull": false,
+			"dataType": "varchar",
+			"maxlength": 50,
+			"type": "Base"
+		},
+		"repair": {
+			"title": "审修",
+			"notNull": false,
+			"dataType": "varchar",
+			"maxlength": 50,
+			"type": "Base"
+		},
+		"report": {
+			"title": "呈报",
+			"notNull": false,
+			"dataType": "varchar",
+			"maxlength": 50,
+			"type": "Base"
+		},
+		"instructions": {
+			"title": "批示",
+			"notNull": false,
+			"dataType": "varchar",
+			"maxlength": 50,
+			"type": "Base"
+		},
+		"conversion": {
+			"title": "转化",
+			"notNull": false,
+			"dataType": "varchar",
+			"maxlength": 50,
+			"type": "Base"
+		},
+		"size": {
+			"title": "文件大小",
+			"notNull": false,
+			"dataType": "bigint",
+			"maxlength": 20,
+			"type": "Number"
+		},
+		"path": {
+			"title": "",
+			"notNull": false,
+			"dataType": "varchar",
+			"maxlength": 1280,
+			"type": "LongText",
+			"hidden":true
+		},
+		"realpath": {
+			"title": "",
+			"notNull": false,
+			"dataType": "varchar",
+			"maxlength": 1280,
+			"type": "LongText",
+			"hidden":true
+		},
+		"extension": {
+			"title": "文件扩展名",
+			"notNull": false,
+			"dataType": "varchar",
+			"maxlength": 50,
+			"type": "Base"
+		}
+	}
+}

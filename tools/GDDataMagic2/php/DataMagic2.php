@@ -4,13 +4,13 @@ header("Access-Control-Allow-Origin: *"); //允许的访问源：所有
 header("Access-Control-Allow-Headers:X-Requested-With");//允许的访问类型：ajax
 
 //导入设置信息
-//require("../settings-local.php");
+require("../../../settings-local.php");
 //或者定义常量
-define('SQL_HOST', '192.168.1.138');   // 数据库服务器地址
-define('SQL_DBNAME', 'bgmobile');    // 数据库名称
-define('SQL_USERNAME', 'root');    // 数据库用户账号
-define('SQL_PASSWORD', '123');    // 数据库用户密码
-define('SQL_CONNECTIONSTRING', 'mysql:dbname='.SQL_DBNAME.';host='.SQL_HOST);    // 数据库链接（依据上面自动生成，无需修改）
+//define('SQL_HOST', '192.168.1.138');   // 数据库服务器地址
+//define('SQL_DBNAME', 'bgmobile');    // 数据库名称
+//define('SQL_USERNAME', 'root');    // 数据库用户账号
+//define('SQL_PASSWORD', '123');    // 数据库用户密码
+//define('SQL_CONNECTIONSTRING', 'mysql:dbname='.SQL_DBNAME.';host='.SQL_HOST);    // 数据库链接（依据上面自动生成，无需修改）
 
 //默认参数
 $name=isset($_REQUEST["name"]) ? $_REQUEST["name"] : "news";
@@ -165,6 +165,7 @@ class DataMagic{
 		if($action==="getMeta"||$action==null){//默认是返回元数据
 			$result=$this->exportMeta();//print_r($params);
 			$result["data"]=$this->search($params);
+			$result["count"]=$this->count($params);
 		}
 		elseif(method_exists($this, $action)){
 			$result=$this->$action($params);
@@ -250,6 +251,28 @@ class DataMagic{
 		$data=$this->outputDataDispose($data);
 		return $data;
 	}
+	function count($params){
+		$sql="SELECT count(*) FROM `".$this->meta["bindTable"]."`";
+		if($params){
+			if(isset($params["where"])){
+				$where=$this->parserWhere($params["where"]);
+				if($where){
+					$sql.=" WHERE ".$where;
+				}
+			}
+		}
+		$result=$this->db->query($sql);
+		$data=$result->fetchAll(PDO::FETCH_ASSOC);
+		return intval($data[0]["count(*)"]);
+	}
+	//不仅返回数据，而且附带符合条件的数据的总数量
+	function search_count($params){
+		$return=array(
+			"data"=>$this->search($params),
+			"count"=>$this->count($params)
+		);
+		return $return;
+	}
 	//将查询条件转换成sql语句的形式
 	function parserWhere($where){
 		$whereStr=array();
@@ -273,6 +296,22 @@ class DataMagic{
 			}
 		}
 		return join(" and ", $whereStr);
+	}
+	//对各项属性进行不同类型的统计功能
+	function statistics($params){
+		$todo=$params["statistics"];//所有要统计的项目，格式为[["统计方式","字段"],["统计方式","字段"]];
+		$result=array();
+		require("statistics.php");
+		$object=new statistics();
+		$dataList=$this->search(array("where"=>$params["where"]));
+		$object->dataList=$dataList;//只用where条件进行搜索获取数据
+		foreach($todo as $statist){
+			$method="by".$statist[0];//获取处理函数
+			if(method_exists($object, $method)){
+				$result[]=$object->$method($statist[1]);
+			}
+		}
+		return $result;
 	}
 	//检查是否有权限访问数据
 	function authorityExamine($tableName){

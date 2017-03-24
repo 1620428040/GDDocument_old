@@ -194,9 +194,19 @@ var DataMagic = {
 	//当DOM和meta都加载完后，初始化视图
 	initViewWithMeta: function(meta) {
 	},
+	//console有时候会被禁用，所以改成用这个方法输出日志
+	log:function(mess){
+//		console.log(mess);
+	},
+	error:function(mess){
+//		console.error(mess);
+	},
+	warn:function(mess){
+//		console.warn(mess);
+	},
 	//输出警告信息
 	warning: function(mess) {
-		console.log(mess);
+		DataMagic.log(mess);
 	},
 	//弹出警告框
 	alert: function(mess) {
@@ -266,7 +276,7 @@ DataMagic.DataType.Base = Class.inherit("基础数据类型", function(fieldName
 		} else {
 			this.field.showMistake(input);
 		}
-		console.log("类型检查  value:"+value+"  validated:"+validated);
+		DataMagic.log("类型检查  value:"+value+"  validated:"+validated);
 		return validated;
 	},
 	getValue: function() {
@@ -457,8 +467,12 @@ DataMagic.DataType.Bool = DataMagic.DataType.Select.inherit("布尔数据类型"
  * storage是sessionStorage或者localStorage
  * host服务器地址
  * server进行不同的操作时，具体的URL链接，如果没有定义，则通过host生成。
+ * filter指定固定的过滤条件，当前model只能搜索filter限定的范围
+ * lastFilter上一次的搜索条件，用来在搜索之后，实现统计等功能
+ * pagesize分页，每页多少条
+ * page当前页数
  */
-DataMagic.Model = Class.inherit("基础model", function(name, storage, host, controller, filter) {
+DataMagic.Model = Class.inherit("基础model", function(name, storage, host, controller, params ) {
 	this.name = name;
 	this.storage = storage;
 	this.server = {
@@ -472,8 +486,19 @@ DataMagic.Model = Class.inherit("基础model", function(name, storage, host, con
 		this.host = host;
 	}
 	this.controller = controller;
-	if(filter) {
-		this.filter = filter;
+	if(params){
+		this.pagesize=params.pagesize||20;
+		this.page=params.page||0;
+		this.filter=params.filter||null;
+		this.lastFilter=this.filter;
+		//兼容的写法
+		if(!(params.pagesize||params.page||params.filter)){
+			this.filter=params;
+		}
+	}
+	else{
+		this.pagesize=20;
+		this.page=0;
 	}
 	if(host || this.server.getMeta) {
 		this.downloadMeta();
@@ -493,7 +518,7 @@ DataMagic.Model = Class.inherit("基础model", function(name, storage, host, con
 //			data: params,
 //			success: function(data,status,xhr) {
 //				if(data == null || data === "") {
-//					console.error("服务器返回的内容为空");
+//					DataMagic.error("服务器返回的内容为空");
 //					return;
 //				}
 //				try {
@@ -501,11 +526,11 @@ DataMagic.Model = Class.inherit("基础model", function(name, storage, host, con
 //						data = JSON.parse(data);
 //					}
 //					if(data.status === "error") {
-//						console.error(data.reason);
+//						DataMagic.error(data.reason);
 //						return;
 //					}
 //				} catch(e) {
-//					console.error("解析数据失败:" + e);
+//					DataMagic.error("解析数据失败:" + e);
 //				}
 //				callback(data);
 //			},
@@ -525,16 +550,16 @@ DataMagic.Model = Class.inherit("基础model", function(name, storage, host, con
 			dataType:'jsonp',
 			success: function(data,status,xhr) {
 				if(data == null || data === "") {
-					console.error("服务器返回的内容为空");
+					DataMagic.error("服务器返回的内容为空");
 					return;
 				}
 				try {
 					if(data.status === "error") {
-						console.error(data.reason);
+						DataMagic.error(data.reason);
 						return;
 					}
 				} catch(e) {
-					console.error("解析数据失败:" + e);
+					DataMagic.error("解析数据失败:" + e);
 				}
 				callback(data);
 			},
@@ -554,13 +579,17 @@ DataMagic.Model = Class.inherit("基础model", function(name, storage, host, con
 			var sign = url.indexOf("?") < 0 ? "?" : "&";
 			return url + sign + "name=" + this.name + "&action=" + action;
 		} else {
-			console.log("需要指定服务器地址或者提供meta")
+			DataMagic.log("需要指定服务器地址或者提供meta")
 		}
 	},
 	//从指定的地址下载元数据
 	downloadMeta: function(callback) {
 		var self = this;
-		DataMagic.Model.request(this.getServerUrl("getMeta"), { where: this.filter }, function(data) {
+		DataMagic.Model.request(this.getServerUrl("getMeta"), {
+			where: this.filter,
+			pagesize:this.pagesize,
+			page:this.page
+		}, function(data) {
 			self.initWithMeta(data);
 			if(callback) {
 				callback.call(this);
@@ -689,14 +718,62 @@ DataMagic.Model = Class.inherit("基础model", function(name, storage, host, con
 		if(this.filter) {
 			$.extend(where, this.filter);
 		}
+		this.lastFilter=where;
 		var self = this;
-		this.request(this.getServerUrl("search"), { where: where }, function(result) {
+		this.request(this.getServerUrl("search"), {
+			where: where,
+			pagesize:this.pagesize,
+			page:this.page
+		}, function(result) {
 			if(callback) {
 				self.data = self.changeDataIndex(result);
 				callback(result);
 			}
 		});
-	}
+	},
+	pageTurn:function(num,success,failed){
+		var gotoPage=this.page+num;
+		if(gotoPage<0){
+			failed("已经是第一页了");
+			return;
+		}
+		var self = this;
+		this.request(this.getServerUrl("search"), {
+			where: this.lastFilter,
+			pagesize:this.pagesize,
+			page:gotoPage
+		}, function(result) {
+			if(result.length){
+				self.data = self.changeDataIndex(result);
+				self.page=gotoPage;
+				success(result);
+			}
+			else{
+				failed("已经是最后一页了")
+			}
+		});
+	},
+	pageTurnTo:function(num,callback){
+		var self = this;
+		this.request(this.getServerUrl("search"), {
+			where: this.lastFilter,
+			pagesize:this.pagesize,
+			page:this.page
+		}, function(result) {
+			if(callback) {
+				self.data = self.changeDataIndex(result);
+				callback(result);
+			}
+		});
+	},
+	statistics:function(statistics,callback) {
+		var self = this;
+		this.request(this.getServerUrl("statistics"), {where:this.lastFilter,statistics:statistics}, function(result) {
+			if(callback) {
+				callback(result);
+			}
+		});
+	},
 });
 //================================================================
 //控制器
@@ -720,7 +797,7 @@ DataMagic.Controller = Class.inherit("基础控制器", function(name, storage, 
 	instanceList: []
 }, {
 	onDOMLoad: function() {
-		console.log("DOM加载完成");
+		DataMagic.log("DOM加载完成");
 		this.list.onDOMLoad();
 		this.toolbar.onDOMLoad();
 		this.form.onDOMLoad();
@@ -729,20 +806,20 @@ DataMagic.Controller = Class.inherit("基础控制器", function(name, storage, 
 		}
 	},
 	onMetaLoad: function() {
-		console.log("meta加载完成");
+		DataMagic.log("meta加载完成");
 		if(document.readyState === "interactive" || document.readyState === "complete") {
 			this.initViewWithMeta();
 		}
 	},
 	onDataLoad: function() {
-		console.log("data加载完成");
+		DataMagic.log("data加载完成");
 		if(this.ready) {
 			this.list.insert(this.model.data);
 		}
 	},
 	onReady: null,
 	initViewWithMeta: function() {
-		console.log("开始初始化视图");
+		DataMagic.log("开始初始化视图");
 		this.ready = true;
 		DataMagic.initViewWithMeta(this.model.meta);
 		if(this.list) {
@@ -761,14 +838,14 @@ DataMagic.Controller = Class.inherit("基础控制器", function(name, storage, 
 		if(this[action]) {
 			this[action]();
 		} else {
-			console.log(this);
-			console.error("调用的方法不存在:" + action);
+			DataMagic.log(this);
+			DataMagic.error("调用的方法不存在:" + action);
 		}
 	},
 	/*控制表单*/
 	showForm: function(mode, data) {
-		console.log("显示表单");
-		console.log(data);
+		DataMagic.log("显示表单");
+		DataMagic.log(data);
 		this.form.mode = mode;
 		this.form.clearAll();
 		if(mode === "insert") {
@@ -836,8 +913,8 @@ DataMagic.Controller = Class.inherit("基础控制器", function(name, storage, 
 		if(result == null) {
 			return;
 		}
-		console.log("获取表单的值");
-		console.log(result);
+		DataMagic.log("获取表单的值");
+		DataMagic.log(result);
 		
 		delete result.id;
 
@@ -899,6 +976,15 @@ DataMagic.Controller = Class.inherit("基础控制器", function(name, storage, 
 			self.list.clearAll();
 			self.list.insert(data);
 		});
+	},
+	pageTurn:function(num){
+		var self = this;
+		this.model.pageTurn(num,function(data){
+			self.list.clearAll();
+			self.list.insert(data);
+		},function(message){
+			alert(message);
+		});
 	}
 });
 //当DOM加载完成时，通知控制器，初始化视图对象
@@ -916,7 +1002,7 @@ $(function() {
 
 //抽象函数，用在抽象类中，防止调用到null导致的报错
 Function.abstract = function() {
-	console.warn("abstract function");
+	DataMagic.warn("abstract function");
 }
 
 /* view类的抽象类
@@ -968,7 +1054,7 @@ DataMagic.View.Base = DataMagic.View.Abstract.inherit("视图类的基类", null
 	},
 	append: function(view) {
 		if(!view.container) {
-			console.warn(view);
+			DataMagic.warn(view);
 		}
 		this.container.append(view.container);
 	},
@@ -1029,10 +1115,14 @@ DataMagic.View.List = DataMagic.View.Base.inherit("列表类", null, null, {
 			$(this).toggleClass("selected");
 		});
 		this.item.dblclick(function(ev) {
-			self.container.find(".selected").removeClass("selected");
-			$(this).addClass("selected");
-			self.controller.browse();
+			self.openItem($(this));
 		});
+	},
+	//打开选中的一项的详情页
+	openItem:function(item){
+		this.container.find(".selected").removeClass("selected");
+		item.addClass("selected");
+		this.controller.browse();
 	},
 	buildItem:function(){
 		return $('<li class="DMItem">'
