@@ -29,14 +29,14 @@ define('SQL_CONNECTIONSTRING', 'mysql:dbname='.SQL_DBNAME.';host='.SQL_HOST);   
 //create("bpm", "bpm_task");
 //create("notice", "oa_sys_notice");
 //create("message", "oa_msg");
-create("uploadfile", "oa_uploadfile");
+//create("uploadfile", "oa_uploadfile");
 
 
 function create($name,$tableName){
 	$path="../meta/".$name.".json";
 
 	$pdo=new PDO(SQL_CONNECTIONSTRING, SQL_USERNAME, SQL_PASSWORD);
-	$tableInfo=$pdo->query("SHOW TABLES LIKE '".$tableName."'")->fetchAll(PDO::FETCH_ASSOC);
+	$tableInfo=$pdo->query("SHOW TABLE STATUS LIKE '".$tableName."'")->fetchAll(PDO::FETCH_ASSOC);
 	if($tableInfo==null){//如果表不存在，则报错
 		throw new Exception("要修改的表不存在！");
 	}
