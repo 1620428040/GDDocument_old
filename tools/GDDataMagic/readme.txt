@@ -1,4 +1,18 @@
-这些组件是实现不同语言和框架之间共用数据结构而实现的
+GDDataMagic是为了实现不同语言和框架之间使用相同数据结构表示，从而方便的切换项目的框架或者UI而实现的
+
+结构分为
+后端	基础操作类		负责实现基本的增删改查等操作
+	管理类		可视化的创建和修改数据结构
+	兼容操作类		为了兼容之前杂乱无章的数据库结构用的
+前端	数据类型类组	为了将各种类型的数据转换成用户容易理解的格式、验证用户的输入
+	数据输入框类组	为了外形上的美观和方便用户输入数据
+	数据模型		与后台进行通讯
+	视图			控制界面上的显示
+	控制器		控制数据模型和视图	
+
+在管理器中，可以创建、修改和更新meta
+meta一般保存在数据库中，然后更新时缓存成json文件
+
 数据结构meta=>基于各种平台的解释器interpreter
 除了规定数据的类型、大小之类的数据，meta中也包含了宽度、css等信息
 
@@ -164,3 +178,43 @@ model中需要实现一个关联数组（或对象）fieldAssoc:field.name=>fiel
 
 按钮的名称列表
 "insert","delete","update","search","save","cancel"
+
+为了实现自定义的树状图(或者其他类型的有向图)，把表的meta分为两部分。
+一部分作为数据表的结构的扩展信息，记录了关联的数据表，描述，主键，字段别名。每个字段的类型，可选项等；
+"uploadfile":{
+	"describe": "文件管理",
+	"bindTable": "oa_uploadfile",
+	"primaryFields": "id",
+	"alias": {
+		"people": "creator",
+		"title": "name",
+		"date": "filetime"
+	},
+	"fieldList":{}
+}
+
+另一部分则会关联一张或者几张数据表，定义一种数据结构(list,table,tree,digraph)并且说明如何使用它们
+"uploadfile":{
+	"describe": "文件管理",
+	"type":"list",
+	"node":"uploadfile",//列表的节点都是相同的结构
+	"tools": [
+		"browse",
+		"delete",
+		"search",
+		"refresh"
+	]
+}
+"uploadfile":{
+	"describe": "文件管理",
+	"type":"tree",
+	"root":"",//树状图的节点可以分为根节点、节点、末端。如果根节点、末端未定义，则使用节点的定义
+	"node":"",
+	"terminal":"",
+	"tools": [
+		"browse",
+		"delete",
+		"search",
+		"refresh"
+	]
+}

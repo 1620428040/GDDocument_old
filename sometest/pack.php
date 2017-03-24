@@ -8,6 +8,7 @@
 		
 <pre>
 <?php
+0x23432;
 $bin = pack("a", "d");
 echo "output: " . $bin . "\n";//即使以二进制的形式输出ASCII码，计算机也会自动转换成字符串
 echo "output: 0x" . bin2hex($bin) . "\n";//函数把 ASCII字符的字符串转换为十六进制值，可以用hex2bin转换回来
