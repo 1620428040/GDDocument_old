@@ -4,13 +4,13 @@ header("Access-Control-Allow-Origin: *"); //允许的访问源：所有
 header("Access-Control-Allow-Headers:X-Requested-With");//允许的访问类型：ajax
 
 //导入设置信息
-require_once("../../../settings-local.php");
+//require_once("../../../settings-local.php");
 //或者定义常量
-//define('SQL_HOST', '192.168.1.138');   // 数据库服务器地址
-//define('SQL_DBNAME', 'bgmobile');    // 数据库名称
-//define('SQL_USERNAME', 'root');    // 数据库用户账号
-//define('SQL_PASSWORD', '123');    // 数据库用户密码
-//define('SQL_CONNECTIONSTRING', 'mysql:dbname='.SQL_DBNAME.';host='.SQL_HOST);    // 数据库链接（依据上面自动生成，无需修改）
+define('SQL_HOST', '192.168.1.80');   // 数据库服务器地址
+define('SQL_DBNAME', 'sw');    // 数据库名称
+define('SQL_USERNAME', 'root');    // 数据库用户账号
+define('SQL_PASSWORD', '123456');    // 数据库用户密码
+define('SQL_CONNECTIONSTRING', 'mysql:dbname='.SQL_DBNAME.';host='.SQL_HOST);    // 数据库链接（依据上面自动生成，无需修改）
 
 //默认参数
 $name=isset($_REQUEST["name"]) ? $_REQUEST["name"] : "news";
@@ -187,7 +187,7 @@ class DataMagic{
 		}
 		$fieldList=array();
 		foreach($meta["fieldList"] as $kn=>$kv){
-			if(!$kv["hidden"]){
+			if(!isset($kv["hidden"])||!$kv["hidden"]){
 				$kn=isset($alias[$kn]) ? $alias[$kn] : $kn;
 				$fieldList[$kn]=$kv;
 			}

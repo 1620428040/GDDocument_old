@@ -436,7 +436,7 @@ DataMagic.DataType.Multiple = DataMagic.DataType.Select.inherit("多选数据类
 /*布尔类型*/
 DataMagic.DataType.Bool = DataMagic.DataType.Select.inherit("布尔数据类型", function(fieldName, fieldMeta) {
 	DataMagic.DataType.Base.call(this, fieldName, fieldMeta);
-	this.options = { "0": "否", "1": "是" };
+	this.options = {"1": "是","0": "否"};
 	this.any = "任意";
 }, null, {
 	typeValidation: function(value) {

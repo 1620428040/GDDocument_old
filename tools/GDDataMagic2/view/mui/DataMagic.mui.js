@@ -25,15 +25,29 @@ DataMagic.ajaxStop=function(){
 	mui('body').progressbar().hide();
 }
 DataMagic.View.Toolbar.prototype.executeEvent="tap";
+DataMagic.View.Toolbar.prototype.ButtonPoor={
+	"browse":'<a class="mui-tab-item DMButton" data-command="browse"><span class="mui-icon mui-icon-more-filled"></span><span class="mui-tab-label">浏览</span></a>',
+	"insert":'<a class="mui-tab-item DMButton" data-command="insert"><span class="mui-icon mui-icon-plus"></span><span class="mui-tab-label">新建</span></a>',
+	"deleteItems":'<a class="mui-tab-item DMButton" data-command="deleteItems"><span class="mui-icon mui-icon-trash"></span><span class="mui-tab-label">删除</span></a>',
+	"update":'<a class="mui-tab-item DMButton" data-command="update"><span class="mui-icon mui-icon-compose"></span><span class="mui-tab-label">修改</span></a>',
+	"search":'<a class="mui-tab-item DMButton" data-command="search"><span class="mui-icon mui-icon-search"></span><span class="mui-tab-label">查找</span></a>',
+	"save":'<a class="mui-tab-item DMButton" data-command="save"><span class="mui-icon mui-icon-search"></span><span class="mui-tab-label">确认</span></a>',
+	"cancel":'<a class="mui-tab-item DMButton" data-command="cancel"><span class="mui-icon mui-icon-search"></span><span class="mui-tab-label">取消</span></a>',
+	"refresh":'<a class="mui-tab-item DMButton" data-command="refresh"><span class="mui-icon mui-icon-refresh"></span><span class="mui-tab-label">刷新</span></a>'
+}
 DataMagic.View.Toolbar.prototype.buildButton=function(command) {
-	return $('<a class="mui-tab-item DMButton" data-command="' + command + '"><span class="mui-icon mui-icon-plus"></span><span class="mui-tab-label">' + command + '</span></a>');
+	if(this.ButtonPoor[command]){
+		return $(this.ButtonPoor[command]);
+	}
+	return $('<a class="mui-tab-item DMButton" data-command="' + command + '"><span class="mui-icon mui-icon-plus"></span><span class="mui-tab-label">' + DataMagic.dictionary[command] + '</span></a>');
 }
 DataMagic.View.List.prototype.buildItem=function(){
 	return $('<li class="mui-table-view-cell mui-media DMItem">'
-		+'<div><span data-field="title"></span></div>'
-		+'<div style="font-size: 14px;color: gray;font-family: kaiti;">'
-		+'<span data-field="people" class="mui-pull-left"></span>'
-		+'<span data-field="date" class="mui-pull-right"></span></div></li>');
+			+'<div><span data-field="title"></span></div>'
+			+'<div style="font-size: 14px;color: gray;font-family: kaiti;">'
+				+'<span data-field="people" class="mui-pull-left"></span>'
+				+'<span data-field="date" class="mui-pull-right"></span>'
+			+'</div></li>');
 }
 DataMagic.Field.Base.prototype.buildField=function(name, meta, data) {
 	return $('<div class="mui-input-row"><label for="' + name + '">' + meta.title + '</label><input class="mui-input-clear DMInput" type="text" id="' + name + '" placeholder="' + (meta.describe||"") + '"/></div>');
