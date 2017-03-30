@@ -15,9 +15,10 @@
 //================================================================
 
 /*Object.create作用与高版本的JavaScript中的Object.create相同*/
+
 if(!Object.create) {
+	var empty = function() {}
 	Object.create = function(parentPrototype) {
-		var empty = function() {}
 		empty.prototype = parentPrototype;
 		return new empty();
 	}
@@ -824,7 +825,6 @@ DataMagic.Controller = Class.inherit("基础控制器", function(name, storage, 
 		DataMagic.initViewWithMeta(this.model.meta);
 		if(this.list) {
 			this.list.clearAll();
-			this.list.alias = this.model.meta.alias;
 			if(this.model.data) {
 				this.list.insert(this.model.data);
 			}
@@ -861,8 +861,10 @@ DataMagic.Controller = Class.inherit("基础控制器", function(name, storage, 
 				this.form.append(field);
 			}
 		} else {
+//			console.log(data);
 			for(var key in this.model.meta.fieldList) {
 				var value = this.model.meta.fieldList[key];
+//				console.log(key,value,data[key]);
 				var field = value.dataType.createInputField(data[key]);
 				this.form.append(field);
 			}
@@ -1100,8 +1102,6 @@ DataMagic.View.Toolbar = DataMagic.View.Base.inherit("工具栏类", null, null,
 });
 
 /* 列表类
- * 属性
- * alias 字段的别名，方便不同格式的数据使用相同的HTML模板用的
  */
 DataMagic.View.List = DataMagic.View.Base.inherit("列表类", null, null, {
 	onDOMLoad: function() {
@@ -1163,12 +1163,6 @@ DataMagic.View.List = DataMagic.View.Base.inherit("列表类", null, null, {
 		cell.find("[data-field]").each(function() {
 			var current = $(this);
 			var field = current.data("field");
-
-			//处理字段的别名
-			if(self.alias && self.alias[field]) {
-				field = self.alias[field];
-			}
-
 			if(data[field]) {
 				if(fieldMeta[field]) {
 					current.html(fieldMeta[field].dataType.tranToString(data[field]));
