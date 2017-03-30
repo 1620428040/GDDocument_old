@@ -1,7 +1,6 @@
 {
 	"describe": "部门",
 	"bindTable": "oa_hr_unit_info",
-	"primaryFields": "UNIT_ID",
 	"tools": [
 		"browse",
 		"delete",
@@ -9,9 +8,11 @@
 		"refresh"
 	],
 	"alias": {
-		"people": "",
-		"title": "",
-		"date": ""
+		"id":"UNIT_ID",
+		"parent":"UPER_UNIT_ID",
+		"people": "UPER_UNIT_NAME",
+		"title": "UNIT_NAME",
+		"date": "path"
 	},
 	"fieldList": {
 		"UNIT_ID": {
@@ -33,7 +34,7 @@
 			"notNull": true,
 			"dataType": "int",
 			"maxlength": 11,
-			"type": "Number",
+			"type": "Select",
 			"valueRange":"0,省;1,市;2,县"
 		},
 		"LEVEL": {
@@ -132,6 +133,7 @@
 			"notNull": false,
 			"dataType": "tinyint",
 			"maxlength": 1,
+			"type":"Select",
 			"valueRange":"0,不显示;1,显示"
 		},
 		"path": {

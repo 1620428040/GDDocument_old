@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta charset="UTF-8">
-		<title>基本的列表页面</title>
+		<title>文件批量下载及统计功能</title>
 		<script src="js/jquery-1.9.1.min.js" type="text/javascript" charset="utf-8"></script>
 		<script src="js/DataMagic-base.js" type="text/javascript" charset="utf-8"></script>
 		
@@ -284,7 +284,8 @@
 				$('[href="#'+gotoTab+'"]').tab('show');
 			}
 			function updateStatistics(){
-				controller.model.statistics([["Type","handle"],["Type","conversion"],["Date","filetime"],["Type","extension"]],function(data){
+				controller.model.statistics([["Type","handle"],["Type","conversion"],["Date","date"],["Type","extension"]],function(data){
+//					console.log(data);
 					$("#loading-box").hide();
 					$(".echarts-box").show();
 			    	new TypeStatistics("文件处理情况分析",document.getElementById('handle-echarts')).addSeries('处理','pie',data[0],{"other":"其他"}).refresh();
@@ -295,14 +296,15 @@
 				});
 			}
 			function downloadZip(){
-				DataMagic.Model.request("../../index.php?checknum="+request.checknum+"&message=download",{"where":controller.model.lastFilter},function(data){
-					if(data&&typeof data==="string"){
-						location.href="../download.php?path="+encodeURIComponent(data);
-					}
-					else{
-						alert("批量下载失败");
-					}
-				});
+				window.parent.downloadZipHook(controller.model.lastFilter);
+//				DataMagic.Model.request("../../index.php?checknum="+request.checknum+"&message=download",{"where":controller.model.lastFilter},function(data){
+//					if(data&&typeof data==="string"){
+//						location.href="../download.php?path="+encodeURIComponent(data);
+//					}
+//					else{
+//						alert("批量下载失败");
+//					}
+//				});
 			}
 			$(function(){
 				if(request.tab){
@@ -340,9 +342,6 @@
 			}
 			controller.showForm=function(){
 				DataMagic.Controller.prototype.showForm.apply(this,arguments);
-				$(".form-group").click(function(){
-					$(this).find("input").eq(0).focus();
-				})
 				$(".form-group input").eq(0).focus();
 			}
 			controller.model.initWithMeta=function(meta){

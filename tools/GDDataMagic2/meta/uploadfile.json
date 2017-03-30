@@ -15,7 +15,7 @@
 	},
 	"fieldList": {
 		"id": {
-			"title": "",
+			"title": "编号",
 			"notNull": false,
 			"dataType": "int",
 			"maxlength": 11,
@@ -143,7 +143,8 @@
 			"notNull": false,
 			"dataType": "varchar",
 			"maxlength": 50,
-			"type": "Base"
+			"type": "Base",
+			"hidden":true
 		}
 	}
 }

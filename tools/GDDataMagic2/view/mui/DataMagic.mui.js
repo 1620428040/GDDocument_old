@@ -39,7 +39,7 @@ DataMagic.Field.Base.prototype.buildField=function(name, meta, data) {
 	return $('<div class="mui-input-row"><label for="' + name + '">' + meta.title + '</label><input class="mui-input-clear DMInput" type="text" id="' + name + '" placeholder="' + (meta.describe||"") + '"/></div>');
 }
 DataMagic.Field.LongText.prototype.buildField=function(name, meta, data) {
-	return $('<div class="mui-input-row" style="height: 120px;"><label for="' + name + '">' + (meta.describe||"") + '</label><textarea id="' + name + '" class="DMInput" rows="5" placeholder="' + (meta.describe||"") + '"></textarea></div>');
+	return $('<div class="mui-input-row" style="height: 120px;"><label for="' + name + '">' + meta.title + '</label><textarea id="' + name + '" class="DMInput" rows="5" placeholder="' + (meta.describe||"") + '"></textarea></div>');
 }
 DataMagic.Field.Number.prototype.buildSearchField=function(name, meta, data){
 	return $('<div class="mui-input-row"><label for="' + name + '">' + meta.title +
