@@ -1,4 +1,6 @@
 <?php
+require_once("Datamagic.php");
+
 //针对已经有的旧的数据表的适配版本
 class Interim extends DataMagic{
 //	function search($params){

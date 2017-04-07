@@ -1,0 +1,11 @@
+{
+	"describe": "部门",
+	"node":{
+		"meta":"department",
+		"tools":["delete","search","refresh"]
+	},
+	"terminal":{
+		"meta":"user",
+		"tools":["delete","search","refresh"]
+	}
+}

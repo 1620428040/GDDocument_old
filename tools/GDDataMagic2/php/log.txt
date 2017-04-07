@@ -1,1 +1,0 @@
-SELECT * FROM `oa_uploadfile` WHERE parentpath like '%调研成果%' LIMIT 0,20

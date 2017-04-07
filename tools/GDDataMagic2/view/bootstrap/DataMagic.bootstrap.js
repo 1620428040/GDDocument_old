@@ -19,6 +19,14 @@ DataMagic.View.List.prototype.buildItem=function(){
 DataMagic.Field.Base.prototype.buildField=function(name, meta, data) {
 	return $('<div class="form-group"><label for="' + name + '">' + meta.title + '</label><input class="form-control DMInput" type="text" id="' + name + '"/><p class="help-block">' + (meta.describe||"") + '</p></div>');
 }
+DataMagic.Field.Base.prototype.showMistake=function(input) {
+	this.container.removeClass("has-success");
+	this.container.addClass("has-error");
+}
+DataMagic.Field.Base.prototype.hideMistake=function(input) {
+	this.container.removeClass("has-error");
+	this.container.addClass("has-success");
+}
 DataMagic.Field.LongText.prototype.buildField=function(name, meta, data) {
 	return $('<div class="form-group"><label for="' + name + '">' + meta.title + '</label><textarea id="' + name + '" class="form-control DMInput" rows="5"></textarea><p class="help-block">' + (meta.describe||"") + '</p></div>');
 }

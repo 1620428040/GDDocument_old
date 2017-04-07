@@ -16,8 +16,13 @@
 .DMItem.selected{
 	background-color: dodgerblue !important;
 }
-.illegal{
-	background-color: red;
+.input-error{
+	border: solid 1px #a94442 !important;
+	border-radius: 5px !important;
+}
+.input-success{
+	border: solid 1px #3c763d !important;
+	border-radius: 5px !important;
 }
 #select-options .selected{
 	background-color: #00A0FF;

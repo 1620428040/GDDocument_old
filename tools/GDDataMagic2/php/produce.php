@@ -30,7 +30,8 @@ define('SQL_CONNECTIONSTRING', 'mysql:dbname='.SQL_DBNAME.';host='.SQL_HOST);   
 //create("notice", "oa_sys_notice");
 //create("message", "oa_msg");
 //create("uploadfile", "oa_uploadfile");
-create("department", "oa_hr_unit_info");
+//create("department", "oa_hr_unit_info");
+create("user", "oa_v_user");
 
 function create($name,$tableName){
 	$path="../meta/".$name.".json";

@@ -196,25 +196,15 @@ var DataMagic = {
 	initViewWithMeta: function(meta) {
 	},
 	//console有时候会被禁用，所以改成用这个方法输出日志
-	log:function(mess){
+	debug:function(mess){
 //		console.log(mess);
 	},
-	error:function(mess){
-//		console.error(mess);
-	},
-	warn:function(mess){
-//		console.warn(mess);
-	},
-	//输出警告信息
-	warning: function(mess) {
-		DataMagic.log(mess);
+	//弹出提示框
+	dialog: function(mess) {
+		alert(mess);
 	},
 	//弹出警告框
 	alert: function(mess) {
-		alert(mess);
-	},
-	//弹出提示信息
-	dialog: function(mess) {
 		alert(mess);
 	},
 	//数据发送之前，进行的操作
@@ -277,7 +267,7 @@ DataMagic.DataType.Base = Class.inherit("基础数据类型", function(fieldName
 		} else {
 			this.field.showMistake(input);
 		}
-		DataMagic.log("类型检查  value:"+value+"  validated:"+validated);
+		DataMagic.debug("类型检查  value:"+value+"  validated:"+validated);
 		return validated;
 	},
 	getValue: function() {
@@ -519,7 +509,7 @@ DataMagic.Model = Class.inherit("基础model", function(name, storage, host, con
 //			data: params,
 //			success: function(data,status,xhr) {
 //				if(data == null || data === "") {
-//					DataMagic.error("服务器返回的内容为空");
+//					DataMagic.debug("服务器返回的内容为空");
 //					return;
 //				}
 //				try {
@@ -527,11 +517,11 @@ DataMagic.Model = Class.inherit("基础model", function(name, storage, host, con
 //						data = JSON.parse(data);
 //					}
 //					if(data.status === "error") {
-//						DataMagic.error(data.reason);
+//						DataMagic.debug(data.reason);
 //						return;
 //					}
 //				} catch(e) {
-//					DataMagic.error("解析数据失败:" + e);
+//					DataMagic.debug("解析数据失败:" + e);
 //				}
 //				callback(data);
 //			},
@@ -551,16 +541,16 @@ DataMagic.Model = Class.inherit("基础model", function(name, storage, host, con
 			dataType:'jsonp',
 			success: function(data,status,xhr) {
 				if(data == null || data === "") {
-					DataMagic.error("服务器返回的内容为空");
+					DataMagic.debug("服务器返回的内容为空");
 					return;
 				}
 				try {
 					if(data.status === "error") {
-						DataMagic.error(data.reason);
+						DataMagic.debug(data.reason);
 						return;
 					}
 				} catch(e) {
-					DataMagic.error("解析数据失败:" + e);
+					DataMagic.debug("解析数据失败:" + e);
 				}
 				callback(data);
 			},
@@ -580,7 +570,7 @@ DataMagic.Model = Class.inherit("基础model", function(name, storage, host, con
 			var sign = url.indexOf("?") < 0 ? "?" : "&";
 			return url + sign + "name=" + this.name + "&action=" + action;
 		} else {
-			DataMagic.log("需要指定服务器地址或者提供meta")
+			DataMagic.debug("需要指定服务器地址或者提供meta")
 		}
 	},
 	//从指定的地址下载元数据
@@ -774,7 +764,7 @@ DataMagic.Model = Class.inherit("基础model", function(name, storage, host, con
 				callback(result);
 			}
 		});
-	},
+	}
 });
 //================================================================
 //控制器
@@ -788,39 +778,39 @@ DataMagic.Model = Class.inherit("基础model", function(name, storage, host, con
  * form表单对象
  * ready布尔值，是否准备完成，可以加载数据了
  */
-DataMagic.Controller = Class.inherit("基础控制器", function(name, storage, host, filter) {
+DataMagic.Controller = Class.inherit("基础控制器",function(name, storage, host, params) {
 	DataMagic.Controller.instanceList.push(this);
-	this.model = new DataMagic.Model(name, storage, host, this, filter);
+	this.model = new DataMagic.Model(name, storage, host, this, params);
 	this.list = new DataMagic.View.List(this);
 	this.toolbar = new DataMagic.View.Toolbar(this);
 	this.form = new DataMagic.View.Form(this);
-}, {
+} , {
 	instanceList: []
 }, {
 	onDOMLoad: function() {
-		DataMagic.log("DOM加载完成");
-		this.list.onDOMLoad();
-		this.toolbar.onDOMLoad();
-		this.form.onDOMLoad();
+		DataMagic.debug("DOM加载完成");
+		this.list.initView($(".DMList"));
+		this.toolbar.initView($(".DMToolbar"));
+		this.form.initView($(".DMForm"));
 		if(this.model.meta) {
 			this.initViewWithMeta();
 		}
 	},
 	onMetaLoad: function() {
-		DataMagic.log("meta加载完成");
+		DataMagic.debug("meta加载完成");
 		if(document.readyState === "interactive" || document.readyState === "complete") {
 			this.initViewWithMeta();
 		}
 	},
 	onDataLoad: function() {
-		DataMagic.log("data加载完成");
+		DataMagic.debug("data加载完成");
 		if(this.ready) {
 			this.list.insert(this.model.data);
 		}
 	},
 	onReady: null,
 	initViewWithMeta: function() {
-		DataMagic.log("开始初始化视图");
+		DataMagic.debug("开始初始化视图");
 		this.ready = true;
 		DataMagic.initViewWithMeta(this.model.meta);
 		if(this.list) {
@@ -834,18 +824,25 @@ DataMagic.Controller = Class.inherit("基础控制器", function(name, storage, 
 			this.onReady();
 		}
 	},
-	execute: function(action) {
+	/* 执行指定的函数
+	 * action要执行的函数
+	 * coerce强制执行而不管工具栏中有没有这个按钮
+	 */
+	execute: function(action,coerce) {
+		if(!coerce&&this.toolbar.buttons.indexOf(action)===-1){
+			return false;
+		}
 		if(this[action]) {
 			this[action]();
 		} else {
-			DataMagic.log(this);
-			DataMagic.error("调用的方法不存在:" + action);
+			DataMagic.debug(this);
+			DataMagic.debug("调用的方法不存在:" + action);
 		}
 	},
 	/*控制表单*/
 	showForm: function(mode, data) {
-		DataMagic.log("显示表单");
-		DataMagic.log(data);
+		DataMagic.debug("显示表单");
+		DataMagic.debug(data);
 		this.form.mode = mode;
 		this.form.clearAll();
 		if(mode === "insert") {
@@ -872,10 +869,8 @@ DataMagic.Controller = Class.inherit("基础控制器", function(name, storage, 
 		this.form.show();
 	},
 	showFormForDetails: function(mode) { //在表单中显示一条数据的详情，进行查看或修改
-		var cells = this.list.getSelectedItems();
-		if(cells.length == 0) {
-			DataMagic.dialog("请选择一条数据");
-		} else {
+		var cells = this.list.getSelectedItems(true);
+		if(cells) {
 			var id = this.list.getIDWithItems(cells)[0];
 			var data = this.model.data[id];
 			this.list.hide();
@@ -915,8 +910,8 @@ DataMagic.Controller = Class.inherit("基础控制器", function(name, storage, 
 		if(result == null) {
 			return;
 		}
-		DataMagic.log("获取表单的值");
-		DataMagic.log(result);
+		DataMagic.debug("获取表单的值");
+		DataMagic.debug(result);
 		
 		delete result.id;
 
@@ -950,10 +945,8 @@ DataMagic.Controller = Class.inherit("基础控制器", function(name, storage, 
 		this.toolbar.refresh(["save", "cancel"]);
 	},
 	deleteItems: function() {
-		var cells = this.list.getSelectedItems(true);
-		if(cells.length == 0) {
-			DataMagic.dialog("至少选择一条数据");
-		} else {
+		var cells = this.list.getSelectedItems(true,true);
+		if(cells){
 			var ids = this.list.getIDWithItems(cells);
 			var self = this;
 			this.model.deleteItems(ids, function() {
@@ -985,7 +978,7 @@ DataMagic.Controller = Class.inherit("基础控制器", function(name, storage, 
 			self.list.clearAll();
 			self.list.insert(data);
 		},function(message){
-			alert(message);
+			DataMagic.alert(message);
 		});
 	}
 });
@@ -1004,7 +997,7 @@ $(function() {
 
 //抽象函数，用在抽象类中，防止调用到null导致的报错
 Function.abstract = function() {
-	DataMagic.warn("abstract function");
+	DataMagic.debug("abstract function");
 }
 
 /* view类的抽象类
@@ -1015,7 +1008,7 @@ Function.abstract = function() {
 DataMagic.View.Abstract = Class.inherit("抽象视图", function(controller) {
 	this.controller = controller;
 }, null, {
-	onDOMLoad: Function.abstract, //当页面的OM加载完成后进行的操作
+	initView: Function.abstract, //当页面的OM加载完成后进行的操作
 	clearAll: Function.abstract, //清除所有内容
 	append: Function.abstract, //将控件添加到当前控件上
 	show: Function.abstract, //显示
@@ -1040,7 +1033,7 @@ DataMagic.Field.Abstract = DataMagic.View.Abstract.inherit("输入框的抽象�
 	},
 	showMistake: Function.abstract, //显示错误标记
 	hideMistake: Function.abstract, //隐藏错误标记
-	onInputClicked:function(input){}//输入框被点击
+	onInputClick:function(input){}//输入框被点击
 });
 DataMagic.DataType.Base.prototype.inputField = DataMagic.Field.Abstract; //注册为Base类型数据的输入框
 
@@ -1056,7 +1049,7 @@ DataMagic.View.Base = DataMagic.View.Abstract.inherit("视图类的基类", null
 	},
 	append: function(view) {
 		if(!view.container) {
-			DataMagic.warn(view);
+			DataMagic.debug(view);
 		}
 		this.container.append(view.container);
 	},
@@ -1068,12 +1061,14 @@ DataMagic.View.Base = DataMagic.View.Abstract.inherit("视图类的基类", null
 	}
 });
 
-/*工具栏类*/
+/* 工具栏类
+ * buttons 按钮组
+ * */
 DataMagic.View.Toolbar = DataMagic.View.Base.inherit("工具栏类", null, null, {
 	executeEvent:"click",//当发生什么事件时，触发操作，在手机版上是"tap"，在电脑版上是"click"
 	buttonPoor: {},
-	onDOMLoad: function() {
-		this.container = $(".DMToolbar");
+	initView:function(container){
+		this.container = container;
 		var self=this;
 		this.container.find(".DMButton").each(function(index,element){
 			var item=$(element);
@@ -1082,6 +1077,7 @@ DataMagic.View.Toolbar = DataMagic.View.Base.inherit("工具栏类", null, null,
 		}).remove();
 	},
 	refresh: function(buttons) {
+		this.buttons=buttons;
 		this.container.find(".DMButton").remove();
 		for(var i in buttons) {
 			var self = this;
@@ -1089,7 +1085,7 @@ DataMagic.View.Toolbar = DataMagic.View.Base.inherit("工具栏类", null, null,
 			if(command==="delete"){
 				command="deleteItems";
 			}
-			var button=this.buttonPoor[command]||this.buildButton(command);
+			var button=this.buttonPoor[command]?$(this.buttonPoor[command]):this.buildButton(command);
 			button.appendTo(this.container);
 			button.on(this.executeEvent,function() {
 				self.controller.execute($(this).data("command"));
@@ -1104,25 +1100,28 @@ DataMagic.View.Toolbar = DataMagic.View.Base.inherit("工具栏类", null, null,
 /* 列表类
  */
 DataMagic.View.List = DataMagic.View.Base.inherit("列表类", null, null, {
-	onDOMLoad: function() {
-		this.container = $(".DMList");
+	initView:function(container){
+		this.container = container;
 		this.item = this.container.find(".DMItem").detach();
 		if(this.item.length === 0) {
 			this.item = this.buildItem();
 		}
 		var self = this;
 		this.item.click(function(ev) {
-			$(this).toggleClass("selected");
+			self.onItemClick($(this));
 		});
 		this.item.dblclick(function(ev) {
-			self.openItem($(this));
+			self.onItemDblclick($(this));
 		});
 	},
+	onItemClick:function(item){
+		item.toggleClass("selected");
+	},
 	//打开选中的一项的详情页
-	openItem:function(item){
+	onItemDblclick:function(item){
 		this.container.find(".selected").removeClass("selected");
 		item.addClass("selected");
-		this.controller.browse();
+		this.controller.execute("browse");
 	},
 	buildItem:function(){
 		return $('<li class="DMItem">'
@@ -1134,9 +1133,19 @@ DataMagic.View.List = DataMagic.View.Base.inherit("列表类", null, null, {
 	clearAll: function() {
 		this.container.find(".DMItem").remove();
 	},
-	getSelectedItems: function(multiple) {
+	//notNull,是否允许为空;multiple,是否允许多选;mess,如果发生错误,要显示的提示
+	getSelectedItems: function(notNull,multiple,mess) {
 		var items = this.container.find(".DMItem.selected");
-		return multiple ? items : items.eq(0);
+		if(notNull&&items.length===0){
+			DataMagic.dialog(mess||"至少选择一条数据");
+			return false;
+		}
+		if(!multiple&&items.length>1){
+			items.removeClass("selected");
+			DataMagic.dialog(mess||"只能选择一条数据");
+			return false;
+		}
+		return items;
 	},
 	getIDWithItems: function(items) {
 		var ids = [];
@@ -1182,8 +1191,8 @@ DataMagic.View.Table = DataMagic.View.List.inherit("表格类");
 
 /*表单类*/
 DataMagic.View.Form = DataMagic.View.Base.inherit("表单类", null, null, {
-	onDOMLoad: function() {
-		this.container = $(".DMForm");
+	initView:function(container){
+		this.container = container;
 		this.container.hide();
 	}
 });
@@ -1206,12 +1215,14 @@ DataMagic.Field.Base = DataMagic.Field.Abstract.inherit("输入框的基类", nu
 	listenInputChange:function(input){
 		var self = this;
 		input.change(function(){
-			var jq=$(this);
-			self.dataType.validationValue(self.getValue(jq),jq);
+			self.onInputChange($(this));
 		});
 		input.click(function(){
-			self.onInputClicked($(this));
+			self.onInputClick($(this));
 		});
+	},
+	onInputChange:function(input){
+		this.dataType.validationValue(this.getValue(input),input);
 	},
 	setValue: function(input, value) {
 		if(value != null) {
@@ -1224,10 +1235,12 @@ DataMagic.Field.Base = DataMagic.Field.Abstract.inherit("输入框的基类", nu
 		return value === "" || value === null ? null : value;
 	},
 	showMistake: function(input) {
-		input.addClass("illegal");
+		input.removeClass("input-success");
+		input.addClass("input-error");
 	},
 	hideMistake: function(input) {
-		input.removeClass("illegal");
+		input.removeClass("input-error");
+		input.addClass("input-success");
 	}
 });
 DataMagic.DataType.Base.prototype.inputField = DataMagic.Field.Base;
@@ -1235,7 +1248,7 @@ DataMagic.DataType.Base.prototype.inputField = DataMagic.Field.Base;
 /*长文本输入框*/
 DataMagic.Field.LongText = DataMagic.Field.Base.inherit("长文本输入框", null, null, {
 	buildField: function(name, meta, data) {
-		return $('<div style="height: 120px;"><label for="' + name + '">' + meta.title + '</label><textarea id="' + name + '" class="DMInput" rows="5" placeholder="' + meta.title + '"></textarea></div>');
+		return $('<div style="height: 120px;"><label for="' + name + '">' + meta.title + '</label><textarea id="' + name + '" style="height: 100%;" class="DMInput" rows="5" placeholder="' + meta.title + '"></textarea></div>');
 	}
 });
 DataMagic.DataType.LongText.prototype.inputField = DataMagic.Field.LongText;
@@ -1272,18 +1285,18 @@ DataMagic.DataType.Number.prototype.inputField = DataMagic.Field.Number;
 function fill() {
 	var data = {
 		"id": 1232,
-		"duty_name": "ergre",
+		"title": "测试-值班",
 		"duty_content": "ergre",
 		"duty_userid": 442124,
-		"duty_username": "ergre",
+		"people": "ergre",
 		"inputuserid": 4241,
 		"inputusername": "ergre",
-		"duty_data": "2017年10月10日",
+		"date": "2017年4月5日  8时28分",
 		"begin_time": "2017年10月10日",
 		"end_time": "2017年10月10日",
-		"visitor": 1,
+//		"visitor": 1,
 		"visitor_name": "ergre",
-		"file": 1,
+//		"file": 1,
 		"file_name": "ergre"
 	}
 	for(var kn in data) {

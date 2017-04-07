@@ -15,30 +15,42 @@
 		<link rel="stylesheet" type="text/css" href="view/mui/DataMagic.mui.css"/>
 		
 		<script type="text/javascript">
-			DataMagic.View.List.prototype.insert=function(data) {
-				if(!(data instanceof Array)) {
-					data = [data];
-				}
-//				data.sort(function(a,b){
-//					return a.id-b.id;
-//				});
-				for(var i in data) {
-					var dataItem = data[i];
-					var cell = this.item.clone(true);
-					this.update(cell, dataItem, this.controller.model.meta.fieldList);
-					cell.data("id", dataItem.id);
-					dataItem.cell=cell;
-					var parent=department.model.data[dataItem.parent];
-					
-					if(parent){
-						parent.cell.after(cell);
+			DataMagic.View.Tree=DataMagic.View.List.inherit("树状图",null,null,{
+				insert:function(data) {
+					if(!(data instanceof Array)) {
+						data = [data];
 					}
-					else{
-						this.container.append(cell);
+					for(var i in data) {
+						var dataItem = data[i];
+						var cell = this.item.clone(true);
+						this.update(cell, dataItem, this.controller.model.meta.fieldList);
+						cell.data("id", dataItem.id);
+						dataItem.cell=cell;
+						var parent=department.model.data[dataItem.parent];
+						
+						if(parent){
+							dataItem.layer=parent.layer+1;
+							cell.css("padding-left",(dataItem.layer*40)+"px");
+							parent.cell.after(cell);
+						}
+						else{
+							dataItem.layer=0;
+							this.container.append(cell);
+						}
 					}
 				}
-			}
-			var department=new DataMagic.Controller("department",sessionStorage,"php/DataMagic2.php");
+				
+			})
+			
+			DataMagic.Controller2 = DataMagic.Controller.inherit("修改过的", function(name, storage, host, params) {
+				DataMagic.Controller.instanceList.push(this);
+				this.model = new DataMagic.Model(name, storage, host, this, params);
+				this.list = new DataMagic.View.Tree(this);
+				this.toolbar = new DataMagic.View.Toolbar(this);
+				this.form = new DataMagic.View.Form(this);
+			});
+			
+			var department=new DataMagic.Controller2("department",sessionStorage,"php/DataMagic2.php");
 		</script>
 	</head>
 	<body class="DataMagic default">
