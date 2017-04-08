@@ -165,27 +165,28 @@ class DataMagicList{
 	//将查询条件转换成sql语句的形式
 	function parserWhere($where){
 		$whereStr=array();
-		
 		foreach($this->meta["alias"] as $alias=>$name){
-			if($where[$alias]){
+			if(isset($where[$alias])){
 				$where[$name]=$where[$alias];
 				unset($where[$alias]);
 			}
 		}
-		
 		foreach($this->meta["fieldList"] as $key=>$value){
-			$whereItem=$where[$key];
-			if($whereItem!=null){
+			if(isset($where[$key])){
+				$whereItem=$where[$key];
 				if($key===$this->meta["primaryFields"]){
 					$whereStr[]=$key."=".$whereItem;
 				}
-				elseif($value["type"]==="Number"||$value["type"]==="Date"||$value["type"]==="DateTime"){
+				elseif(is_array($whereItem)){
 					if($whereItem["start"]){
 						$whereStr[]=$key.">".$whereItem["start"];
 					}
 					if($whereItem["end"]){
 						$whereStr[]=$key."<".$whereItem["end"];
 					}
+				}
+				elseif($value["type"]==="Number"||$value["type"]==="Date"||$value["type"]==="DateTime"){
+					$whereStr[]=$key."=".$whereItem;
 				}
 				else{
 					$whereStr[]=$key." like '%".$whereItem."%'";

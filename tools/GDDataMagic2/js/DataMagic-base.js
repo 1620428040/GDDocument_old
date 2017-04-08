@@ -1066,14 +1066,14 @@ DataMagic.View.Base = DataMagic.View.Abstract.inherit("视图类的基类", null
  * */
 DataMagic.View.Toolbar = DataMagic.View.Base.inherit("工具栏类", null, null, {
 	executeEvent:"click",//当发生什么事件时，触发操作，在手机版上是"tap"，在电脑版上是"click"
-	buttonPoor: {},
+	buttonPool: {},
 	initView:function(container){
 		this.container = container;
 		var self=this;
 		this.container.find(".DMButton").each(function(index,element){
 			var item=$(element);
 			var command=item.data("command");
-			self.buttonPoor[command]=item;
+			self.buttonPool[command]=item;
 		}).remove();
 	},
 	refresh: function(buttons) {
@@ -1085,7 +1085,7 @@ DataMagic.View.Toolbar = DataMagic.View.Base.inherit("工具栏类", null, null,
 			if(command==="delete"){
 				command="deleteItems";
 			}
-			var button=this.buttonPoor[command]?$(this.buttonPoor[command]):this.buildButton(command);
+			var button=this.buttonPool[command]?$(this.buttonPool[command]):this.buildButton(command);
 			button.appendTo(this.container);
 			button.on(this.executeEvent,function() {
 				self.controller.execute($(this).data("command"));

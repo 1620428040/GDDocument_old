@@ -1,11 +1,21 @@
 {
 	"describe": "部门",
-	"node":{
-		"meta":"department",
-		"tools":["delete","search","refresh"]
+	"handler":"DataMagicGraph",
+	"root":{
+		"type":"department",
+		"id":0
 	},
-	"terminal":{
-		"meta":"user",
-		"tools":["delete","search","refresh"]
+	"node":{
+		"department":{
+			"nodeType":"node",
+			"extend":{
+				"tools":["delete","search","refresh"]
+			}
+		},"user":{
+			"nodeType":"terminal",
+			"extend":{
+				"tools":["delete","search","refresh"]
+			}
+		}
 	}
 }

@@ -1,4 +1,5 @@
 <?php
+
 //响应头
 header("Access-Control-Allow-Origin: *"); //允许的访问源：所有
 header("Access-Control-Allow-Headers:X-Requested-With");//允许的访问类型：ajax
@@ -13,10 +14,11 @@ define('SQL_PASSWORD', '123456');    // 数据库用户密码
 define('SQL_CONNECTIONSTRING', 'mysql:dbname='.SQL_DBNAME.';host='.SQL_HOST);    // 数据库链接（依据上面自动生成，无需修改）
 
 //导入类库文件
-require_once("Tree.php");
+require("DataMagicList.php");
+require("DataMagicGraph.php");
 
 //默认参数
-$name=isset($_REQUEST["name"]) ? $_REQUEST["name"] : "news";
+$name=isset($_REQUEST["name"]) ? $_REQUEST["name"] : "duty";
 
 //拿来测试的参数
 $demo=array(
@@ -46,17 +48,15 @@ $demo=array(
 );
 
 $db=new PDO(SQL_CONNECTIONSTRING, SQL_USERNAME, SQL_PASSWORD);
-$magic=DataMagic::createDataMagic($name,$db);
+$magic=DataMagicList::createDataMagicList($name,$db);
 $magic->permission=array("person","oa_news");
 $data=$magic->shortcutOperate($_REQUEST);
 
 //兼容jsonp协议
-$callback = $_REQUEST['callback'];
-if ($callback) {
-    header('Content-Type: text/javascript');
+if (isset($_REQUEST['callback'])) {
+	$callback=$_REQUEST['callback'];
     echo $callback . '(' . json_encode($data) . ');';
 } else {
-    header('Content-Type: application/x-json');
     echo json_encode($data);
 }
 ?>

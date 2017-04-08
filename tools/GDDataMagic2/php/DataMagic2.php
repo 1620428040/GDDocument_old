@@ -53,12 +53,10 @@ $magic->permission=array("person","oa_news");
 $data=$magic->shortcutOperate($_REQUEST);
 
 //兼容jsonp协议
-$callback = $_REQUEST['callback'];
-if ($callback) {
-    header('Content-Type: text/javascript');
+if (isset($_REQUEST['callback'])) {
+	$callback=$_REQUEST['callback'];
     echo $callback . '(' . json_encode($data) . ');';
 } else {
-    header('Content-Type: application/x-json');
     echo json_encode($data);
 }
 ?>

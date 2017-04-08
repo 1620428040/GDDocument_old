@@ -1,6 +1,7 @@
 {
 	"describe": "部门",
 	"bindTable": "oa_hr_unit_info",
+	"primaryFields": "UNIT_ID",
 	"tools": [
 		"browse",
 		"delete",

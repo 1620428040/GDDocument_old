@@ -25,7 +25,7 @@ DataMagic.ajaxStop=function(){
 	mui('body').progressbar().hide();
 }
 DataMagic.View.Toolbar.prototype.executeEvent="tap";
-DataMagic.View.Toolbar.prototype.buttonPoor={
+DataMagic.View.Toolbar.prototype.buttonPool={
 	"browse":'<a class="mui-tab-item DMButton" data-command="browse"><span class="mui-icon mui-icon-more-filled"></span><span class="mui-tab-label">浏览</span></a>',
 	"insert":'<a class="mui-tab-item DMButton" data-command="insert"><span class="mui-icon mui-icon-plus"></span><span class="mui-tab-label">新建</span></a>',
 	"deleteItems":'<a class="mui-tab-item DMButton" data-command="deleteItems"><span class="mui-icon mui-icon-trash"></span><span class="mui-tab-label">删除</span></a>',

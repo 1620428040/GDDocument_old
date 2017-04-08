@@ -1,7 +1,7 @@
 {
-	"describe": "VIEW",
+	"describe": "用户",
 	"bindTable": "oa_v_user",
-	"primaryFields": null,
+	"primaryFields": "id",
 	"tools": [
 		"browse",
 		"delete",
@@ -9,6 +9,7 @@
 		"refresh"
 	],
 	"alias": {
+		"parent":"dept_id",
 		"people": "",
 		"title": "",
 		"date": ""
@@ -182,7 +183,7 @@
 			"notNull": true,
 			"dataType": "varchar",
 			"maxlength": 10,
-			"type": "Base"
+			"type": "Number"
 		},
 		"dept_name": {
 			"title": "部门名称",
