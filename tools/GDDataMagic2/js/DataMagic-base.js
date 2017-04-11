@@ -13,14 +13,18 @@
 //================================================================
 //polyfills补充一些JavaScript引擎不提供的功能
 //================================================================
-
+//抽象函数，用在抽象类中，防止调用到null导致的报错
+Function.abstract = function() {
+	DataMagic.debug("abstract function");
+}
+//空函数
+Function.empty = function() {}
 /*Object.create作用与高版本的JavaScript中的Object.create相同*/
 
 if(!Object.create) {
-	var empty = function() {}
 	Object.create = function(parentPrototype) {
-		empty.prototype = parentPrototype;
-		return new empty();
+		Function.empty.prototype = parentPrototype;
+		return new Function.empty();
 	}
 }
 
@@ -71,6 +75,9 @@ Class.inherit = function(title, constructor, classMethods, methods) {
 	newClass.classTitle = title;
 	newClass.base = parentClass;
 	return newClass;
+}
+Class.extend=function(prototype,classMethods){
+	return this.inherit(prototype.title,prototype.construct,classMethods,prototype);
 }
 //当调用obj.toString时，显示当前类或者对象的介绍
 Class.classTitle = "基础类";
@@ -214,6 +221,56 @@ var DataMagic = {
 	ajaxStop:function() {
 	}
 };
+
+
+//================================================================
+//抽象层，定义了MVC各层的抽象接口
+//为了避免出现调用到null的情况，所以未定义的函数的值设置为Function.abstract
+//尽量避免在非view部分调用跟UI框架相关的代码。比如直接调用jQuery对象的show、hide、append等
+//================================================================
+
+/* view类的抽象类
+ * 
+ * 属性
+ * container UI对象对应的jQuery对象
+ */
+var DMAbstractView={
+	title:"抽象视图",
+	construct:function(controller) {
+		this.controller = controller;
+	},
+	initView: Function.abstract, //当页面的OM加载完成后进行的操作
+	clearAll: Function.abstract, //清除所有内容
+	append: Function.abstract, //将控件添加到当前控件上
+	show: Function.abstract, //显示
+	hide: Function.abstract //隐藏
+}
+DataMagic.View.Abstract = Class.extend(DMAbstractView);
+
+/* 输入框的抽象类
+ * 
+ * 属性
+ * input对应正常情况下的input元素
+ * minInput/maxInput对应搜索模式下，数字类型及其子类用的，用来输入最小值和最大值的输入框
+ */
+var DMAbstractField={
+	title:"输入框的抽象类",
+	construct:function(dataType) {
+		this.dataType = dataType;
+	},
+	setValue: Function.abstract, //设置值
+	getValue: Function.abstract, //获取值
+	createField: function(name, meta, data) {}, //创建输入框
+	//创建搜索框
+	createSearchField: function(name, meta, data) {
+		this.createField(name, meta, data);
+	},
+	showMistake: Function.abstract, //显示错误标记
+	hideMistake: Function.abstract, //隐藏错误标记
+	onInputClick:function(input){}//输入框被点击
+}
+DataMagic.Field.Abstract = DataMagic.View.Abstract.extend(DMAbstractField);
+
 //================================================================
 //数据类型
 //================================================================
@@ -224,14 +281,17 @@ var DataMagic = {
  * inputField  对应的输入框的类。定义输入框类之后在这个属性上注册一下，就能在创建输入框时自动调用
  * pattern  该数据类型要求的正则表达式
  */
-DataMagic.DataType.Base = Class.inherit("基础数据类型", function(fieldName, fieldMeta) {
-	this.fieldName = fieldName;
-	this.fieldMeta = fieldMeta;
-	var regexp = fieldMeta.regexp || this.defaultRegExp;
-	if(regexp) {
-		this.regexp = new RegExp(regexp);
-	}
-}, null, {
+var DMBaseDataType={
+	title:"基础数据类型",
+	construct:function(fieldName, fieldMeta) {
+		this.fieldName = fieldName;
+		this.fieldMeta = fieldMeta;
+		var regexp = fieldMeta.regexp || this.defaultRegExp;
+		if(regexp) {
+			this.regexp = new RegExp(regexp);
+		}
+	},
+	inputField:DataMagic.Field.Abstract, //注册为Base类型数据的输入框
 	tranToString: function(data) {
 		return(data == null || data === "") ? "" : data.toString();
 	},
@@ -296,13 +356,15 @@ DataMagic.DataType.Base = Class.inherit("基础数据类型", function(fieldName
 		this.validated = this.validationSearchParams(value, this.field.input);
 		return this.tranToData(value);
 	}
-});
+}
+DataMagic.DataType.Base = Class.extend(DMBaseDataType);
 
 /*长文本类型*/
 DataMagic.DataType.LongText = DataMagic.DataType.Base.inherit("长文本数据类型");
 
 /*数字类型*/
-DataMagic.DataType.Number = DataMagic.DataType.Base.inherit("数字数据类型", null, null, {
+var DMNumberDataType={
+	title:"数字数据类型",
 	pattern: /^[0-9]{0,}$/,
 	tranToData: function(str) {
 		return str == null ? null : parseInt(str);
@@ -324,10 +386,12 @@ DataMagic.DataType.Number = DataMagic.DataType.Base.inherit("数字数据类型"
 		}
 		return values;
 	}
-});
+}
+DataMagic.DataType.Number = DataMagic.DataType.Base.extend(DMNumberDataType);
 
 /*日期类型*/
-DataMagic.DataType.Date = DataMagic.DataType.Number.inherit("日期数据类型", null, null, {
+var DMDateDataType={
+	title:"日期数据类型",
 	format: "yyyy年M月d日",
 	pattern: /^[0-9]{4}年[0-9]{1,2}月[0-9]{1,2}日$/,
 	tranToString: function(s) {
@@ -347,32 +411,37 @@ DataMagic.DataType.Date = DataMagic.DataType.Number.inherit("日期数据类型"
 		var date = Date.createFormFormatString(this.format, str);
 		return date.getTime() / 1000;
 	}
-});
+}
+DataMagic.DataType.Date = DataMagic.DataType.Number.extend(DMDateDataType);
 
 /*日期时间类型*/
-DataMagic.DataType.DateTime = DataMagic.DataType.Date.inherit("日期加时间数据类型", null, null, {
+var DMDateTimeDataType={
+	title:"日期加时间数据类型",
 	format: "yyyy年M月d日  H时m分",
 	pattern: /^[0-9]{4}年[0-9]{1,2}月[0-9]{1,2}日  [0-9]{1,2}时[0-9]{1,2}分$/
-});
+}
+DataMagic.DataType.DateTime = DataMagic.DataType.Date.extend(DMDateTimeDataType);
 
 /* 单选类型
  * 属性
  * options  选项
  * any 当进行搜索时，表示任意选项的字符串
  */
-DataMagic.DataType.Select = DataMagic.DataType.Base.inherit("单选数据类型", function(fieldName, fieldMeta) {
-	DataMagic.DataType.Base.apply(this,arguments);
-	this.options = {};
-	this.any = "任意";
-	var titles = [];
-	var splited = fieldMeta.valueRange.split(";");
-	for(var i in splited) {
-		var kvp = splited[i].split(",");
-		this.options[kvp[0]] = kvp[1];
-		titles.push(kvp[1]);
-	}
-	this.pattern = new RegExp("^(?:" + titles.join("|") + "|" + this.any + ")$");
-}, null, {
+var DMSelectDataType={
+	title:"单选数据类型",
+	construct:function(fieldName, fieldMeta) {
+		DataMagic.DataType.Base.apply(this,arguments);
+		this.options = {};
+		this.any = "任意";
+		var titles = [];
+		var splited = fieldMeta.valueRange.split(";");
+		for(var i in splited) {
+			var kvp = splited[i].split(",");
+			this.options[kvp[0]] = kvp[1];
+			titles.push(kvp[1]);
+		}
+		this.pattern = new RegExp("^(?:" + titles.join("|") + "|" + this.any + ")$");
+	},
 	typeValidation: function(value) {
 		return this.pattern.test(value);
 	},
@@ -387,10 +456,12 @@ DataMagic.DataType.Select = DataMagic.DataType.Base.inherit("单选数据类型"
 			}
 		}
 	}
-});
+}
+DataMagic.DataType.Select = DataMagic.DataType.Base.extend(DMSelectDataType);
 
 /*多选类型*/
-DataMagic.DataType.Multiple = DataMagic.DataType.Select.inherit("多选数据类型", null, null, {
+var DMMultipleDataType={
+	title:"多选数据类型",
 	typeValidation: function(value) {
 		var values = value.split(",");
 		for(var i in values) {
@@ -421,14 +492,17 @@ DataMagic.DataType.Multiple = DataMagic.DataType.Select.inherit("多选数据类
 		}
 		return values.length > 0 ? values.join(",") : null;
 	}
-});
+}
+DataMagic.DataType.Multiple = DataMagic.DataType.Select.extend(DMMultipleDataType);
 
 /*布尔类型*/
-DataMagic.DataType.Bool = DataMagic.DataType.Select.inherit("布尔数据类型", function(fieldName, fieldMeta) {
-	DataMagic.DataType.Base.call(this, fieldName, fieldMeta);
-	this.options = {"1": "是","0": "否"};
-	this.any = "任意";
-}, null, {
+var DMBoolDataType={
+	title:"布尔数据类型",
+	construct:function(fieldName, fieldMeta) {
+		DataMagic.DataType.Base.call(this, fieldName, fieldMeta);
+		this.options = {"1": "是","0": "否"};
+		this.any = "任意";
+	},
 	typeValidation: function(value) {
 		return value === this.any ? true : /^[是否]$/.test(value);
 	},
@@ -444,7 +518,8 @@ DataMagic.DataType.Bool = DataMagic.DataType.Select.inherit("布尔数据类型"
 		}
 		return value;
 	}
-});
+}
+DataMagic.DataType.Bool = DataMagic.DataType.Select.extend(DMBoolDataType);
 
 //================================================================
 //数据模型
@@ -463,103 +538,40 @@ DataMagic.DataType.Bool = DataMagic.DataType.Select.inherit("布尔数据类型"
  * pagesize分页，每页多少条
  * page当前页数
  */
-DataMagic.Model = Class.inherit("基础model", function(name, storage, host, controller, params ) {
-	this.name = name;
-	this.storage = storage;
-	this.server = {
-//		getMeta:null,
-//		insert:null,
-//		delete:null,
-//		update:null,
-//		search:null
-	};
-	if(host) {
-		this.host = host;
-	}
-	this.controller = controller;
-	if(params){
-		this.pagesize=params.pagesize||20;
-		this.page=params.page||0;
-		this.filter=params.filter||null;
-		this.lastFilter=this.filter;
-		//兼容的写法
-		if(!(params.pagesize||params.page||params.filter)){
-			this.filter=params;
+var DMListModel={
+	title:"基础model",
+	construct:function(name, storage, host, controller, params ) {
+		this.name = name;
+		this.storage = storage;
+		this.server = {
+	//		getMeta:null,
+	//		insert:null,
+	//		delete:null,
+	//		update:null,
+	//		search:null
+		};
+		if(host) {
+			this.host = host;
 		}
-	}
-	else{
-		this.pagesize=20;
-		this.page=0;
-	}
-	if(host || this.server.getMeta) {
-		this.downloadMeta();
-	}
-}, {
-	request: function(url, params, callback) {
-		if(url == null) {
-			return;
-		}
-		DataMagic.ajaxSend(params);
-		
-//		$.ajax({
-//			type: "post",
-//			url: url,
-//			async: true,
-//			cache:false,
-//			data: params,
-//			success: function(data,status,xhr) {
-//				if(data == null || data === "") {
-//					DataMagic.debug("服务器返回的内容为空");
-//					return;
-//				}
-//				try {
-//					if(typeof data==="string"){
-//						data = JSON.parse(data);
-//					}
-//					if(data.status === "error") {
-//						DataMagic.debug(data.reason);
-//						return;
-//					}
-//				} catch(e) {
-//					DataMagic.debug("解析数据失败:" + e);
-//				}
-//				callback(data);
-//			},
-//			crossDomain: true,
-//			complete:function(xhr,status){
-//				DataMagic.ajaxStop();
-//			}
-//		});
-
-
-		$.ajax({
-			type: "get",
-			url: url,
-			async: true,
-			cache:false,
-			data: params,
-			dataType:'jsonp',
-			success: function(data,status,xhr) {
-				if(data == null || data === "") {
-					DataMagic.debug("服务器返回的内容为空");
-					return;
-				}
-				try {
-					if(data.status === "error") {
-						DataMagic.debug(data.reason);
-						return;
-					}
-				} catch(e) {
-					DataMagic.debug("解析数据失败:" + e);
-				}
-				callback(data);
-			},
-			complete:function(xhr,status){
-				DataMagic.ajaxStop();
+		this.controller = controller;
+		if(params){
+			this.pagesize=params.pagesize||20;
+			this.page=params.page||0;
+			this.filter=params.filter||null;
+			this.lastFilter=this.filter;
+			//兼容的写法
+			if(!(params.pagesize||params.page||params.filter)){
+				this.filter=params;
 			}
-		});
-	}
-}, {
+		}
+		else{
+			this.pagesize=20;
+			this.page=0;
+		}
+		if(host || this.server.getMeta) {
+			this.downloadMeta();
+		}
+	},
 	//设置服务器为标准的接口
 	getServerUrl: function(action) {
 		if(this.server[action]) {
@@ -765,6 +777,72 @@ DataMagic.Model = Class.inherit("基础model", function(name, storage, host, con
 			}
 		});
 	}
+}
+DataMagic.Model = Class.extend(DMListModel,{
+	request: function(url, params, callback) {
+		if(url == null) {
+			return;
+		}
+		DataMagic.ajaxSend(params);
+		
+//		$.ajax({
+//			type: "post",
+//			url: url,
+//			async: true,
+//			cache:false,
+//			data: params,
+//			success: function(data,status,xhr) {
+//				if(data == null || data === "") {
+//					DataMagic.debug("服务器返回的内容为空");
+//					return;
+//				}
+//				try {
+//					if(typeof data==="string"){
+//						data = JSON.parse(data);
+//					}
+//					if(data.status === "error") {
+//						DataMagic.debug(data.reason);
+//						return;
+//					}
+//				} catch(e) {
+//					DataMagic.debug("解析数据失败:" + e);
+//				}
+//				callback(data);
+//			},
+//			crossDomain: true,
+//			complete:function(xhr,status){
+//				DataMagic.ajaxStop();
+//			}
+//		});
+
+
+		$.ajax({
+			type: "get",
+			url: url,
+			async: true,
+			cache:false,
+			data: params,
+			dataType:'jsonp',
+			success: function(data,status,xhr) {
+				if(data == null || data === "") {
+					DataMagic.debug("服务器返回的内容为空");
+					return;
+				}
+				try {
+					if(data.status === "error") {
+						DataMagic.debug(data.reason);
+						return;
+					}
+				} catch(e) {
+					DataMagic.debug("解析数据失败:" + e);
+				}
+				callback(data);
+			},
+			complete:function(xhr,status){
+				DataMagic.ajaxStop();
+			}
+		});
+	}
 });
 //================================================================
 //控制器
@@ -778,15 +856,15 @@ DataMagic.Model = Class.inherit("基础model", function(name, storage, host, con
  * form表单对象
  * ready布尔值，是否准备完成，可以加载数据了
  */
-DataMagic.Controller = Class.inherit("基础控制器",function(name, storage, host, params) {
-	DataMagic.Controller.instanceList.push(this);
-	this.model = new DataMagic.Model(name, storage, host, this, params);
-	this.list = new DataMagic.View.List(this);
-	this.toolbar = new DataMagic.View.Toolbar(this);
-	this.form = new DataMagic.View.Form(this);
-} , {
-	instanceList: []
-}, {
+var DMListController={
+	title:"基础控制器",
+	construct:function(name, storage, host, params) {
+		DataMagic.Controller.instanceList.push(this);
+		this.model = new DataMagic.Model(name, storage, host, this, params);
+		this.list = new DataMagic.View.List(this);
+		this.toolbar = new DataMagic.View.Toolbar(this);
+		this.form = new DataMagic.View.Form(this);
+	}, 
 	onDOMLoad: function() {
 		DataMagic.debug("DOM加载完成");
 		this.list.initView($(".DMList"));
@@ -981,61 +1059,19 @@ DataMagic.Controller = Class.inherit("基础控制器",function(name, storage, h
 			DataMagic.alert(message);
 		});
 	}
-});
-//当DOM加载完成时，通知控制器，初始化视图对象
-$(function() {
-	for(var i in DataMagic.Controller.instanceList) {
-		DataMagic.Controller.instanceList[i].onDOMLoad();
+}
+DataMagic.Controller = Class.extend(DMListController,{
+	instanceList: [],
+	onDOMLoad:function() {
+		//因为是放在$()中的，所以此处的DataMagic.Controller不能改成this
+		for(var i in DataMagic.Controller.instanceList) {
+			DataMagic.Controller.instanceList[i].onDOMLoad();
+		}
 	}
 });
+//当DOM加载完成时，通知控制器，初始化视图对象
+$(DataMagic.Controller.onDOMLoad);
 
-//================================================================
-//抽象类，定义了UI部分应该有的一些功能的接口
-//为了避免出现调用到null的情况，所以默认值是空函数
-//尽量避免在非view部分调用跟UI框架相关的代码。比如直接调用jQuery对象的show、hide、append等
-//================================================================
-
-//抽象函数，用在抽象类中，防止调用到null导致的报错
-Function.abstract = function() {
-	DataMagic.debug("abstract function");
-}
-
-/* view类的抽象类
- * 
- * 属性
- * container UI对象对应的jQuery对象
- */
-DataMagic.View.Abstract = Class.inherit("抽象视图", function(controller) {
-	this.controller = controller;
-}, null, {
-	initView: Function.abstract, //当页面的OM加载完成后进行的操作
-	clearAll: Function.abstract, //清除所有内容
-	append: Function.abstract, //将控件添加到当前控件上
-	show: Function.abstract, //显示
-	hide: Function.abstract //隐藏
-});
-
-/* 输入框的抽象类
- * 
- * 属性
- * input对应正常情况下的input元素
- * minInput/maxInput对应搜索模式下，数字类型及其子类用的，用来输入最小值和最大值的输入框
- */
-DataMagic.Field.Abstract = DataMagic.View.Abstract.inherit("输入框的抽象类", function(dataType) {
-	this.dataType = dataType;
-}, null, {
-	setValue: Function.abstract, //设置值
-	getValue: Function.abstract, //获取值
-	createField: function(name, meta, data) {}, //创建输入框
-	//创建搜索框
-	createSearchField: function(name, meta, data) {
-		this.createField(name, meta, data);
-	},
-	showMistake: Function.abstract, //显示错误标记
-	hideMistake: Function.abstract, //隐藏错误标记
-	onInputClick:function(input){}//输入框被点击
-});
-DataMagic.DataType.Base.prototype.inputField = DataMagic.Field.Abstract; //注册为Base类型数据的输入框
 
 //================================================================
 //视图部分
@@ -1043,7 +1079,8 @@ DataMagic.DataType.Base.prototype.inputField = DataMagic.Field.Abstract; //注�
 //================================================================
 
 /*view类的基类*/
-DataMagic.View.Base = DataMagic.View.Abstract.inherit("视图类的基类", null, null, {
+var DMBaseView={
+	title:"视图类的基类",
 	clearAll: function() {
 		this.container.empty();
 	},
@@ -1059,12 +1096,14 @@ DataMagic.View.Base = DataMagic.View.Abstract.inherit("视图类的基类", null
 	hide: function() {
 		this.container.hide();
 	}
-});
+}
+DataMagic.View.Base = DataMagic.View.Abstract.extend(DMBaseView);
 
 /* 工具栏类
  * buttons 按钮组
  * */
-DataMagic.View.Toolbar = DataMagic.View.Base.inherit("工具栏类", null, null, {
+var DMToolbarView={
+	title:"工具栏类",
 	executeEvent:"click",//当发生什么事件时，触发操作，在手机版上是"tap"，在电脑版上是"click"
 	buttonPool: {},
 	initView:function(container){
@@ -1095,11 +1134,13 @@ DataMagic.View.Toolbar = DataMagic.View.Base.inherit("工具栏类", null, null,
 	buildButton: function(command) {
 		return $('<a class="DMButton" data-command="' + command + '"><span>' + command + '</span></a>');
 	}
-});
+}
+DataMagic.View.Toolbar = DataMagic.View.Base.extend(DMToolbarView);
 
 /* 列表类
  */
-DataMagic.View.List = DataMagic.View.Base.inherit("列表类", null, null, {
+var DMListView={
+	title:"列表类",
 	initView:function(container){
 		this.container = container;
 		this.item = this.container.find(".DMItem").detach();
@@ -1184,25 +1225,29 @@ DataMagic.View.List = DataMagic.View.Base.inherit("列表类", null, null, {
 	remove: function(cells) {
 		cells.remove();
 	}
-});
+}
+DataMagic.View.List = DataMagic.View.Base.extend(DMListView);
 
 /*表格类*/
 DataMagic.View.Table = DataMagic.View.List.inherit("表格类");
 
 /*表单类*/
-DataMagic.View.Form = DataMagic.View.Base.inherit("表单类", null, null, {
+var DMFormView={
+	title:"表单类",
 	initView:function(container){
 		this.container = container;
 		this.container.hide();
 	}
-});
+}
+DataMagic.View.Form = DataMagic.View.Base.extend(DMFormView);
 
 /* 输入框的基类
  * 
  * 属性
  * input对应输入框
  */
-DataMagic.Field.Base = DataMagic.Field.Abstract.inherit("输入框的基类", null, null, {
+var DMBaseField={
+	title:"输入框的基类",
 	buildField: function(name, meta, data) {
 		return $('<div><label for="' + name + '">' + meta.title + '</label><input class="DMInput" type="text" id="' + name + '"/></div>');
 	},
@@ -1242,15 +1287,18 @@ DataMagic.Field.Base = DataMagic.Field.Abstract.inherit("输入框的基类", nu
 		input.removeClass("input-error");
 		input.addClass("input-success");
 	}
-});
+}
+DataMagic.Field.Base = DataMagic.Field.Abstract.extend(DMBaseField);
 DataMagic.DataType.Base.prototype.inputField = DataMagic.Field.Base;
 
 /*长文本输入框*/
-DataMagic.Field.LongText = DataMagic.Field.Base.inherit("长文本输入框", null, null, {
+var DMLongTextField={
+	title:"长文本输入框",
 	buildField: function(name, meta, data) {
 		return $('<div style="height: 120px;"><label for="' + name + '">' + meta.title + '</label><textarea id="' + name + '" style="height: 100%;" class="DMInput" rows="5" placeholder="' + meta.title + '"></textarea></div>');
 	}
-});
+}
+DataMagic.Field.LongText = DataMagic.Field.Base.extend(DMLongTextField);
 DataMagic.DataType.LongText.prototype.inputField = DataMagic.Field.LongText;
 
 /* 数字类型的输入框
@@ -1261,7 +1309,8 @@ DataMagic.DataType.LongText.prototype.inputField = DataMagic.Field.LongText;
  * input对应正常情况下的输入框
  * minInput/maxInput在搜索状态下，输入最小值和最大值的输入框（数字类型及其子类）
  */
-DataMagic.Field.Number = DataMagic.Field.Base.inherit("数字类型的输入框", null, null, {
+var DMNumberField={
+	title:"数字类型的输入框",
 	buildSearchField:function(name, meta, data){
 		return $('<div><label for="' + name + '">' + meta.title +
 			'</label><input class="DMInput" type="text" id="' +name + '"/></div><div><label>' +
@@ -1274,7 +1323,8 @@ DataMagic.Field.Number = DataMagic.Field.Base.inherit("数字类型的输入框"
 		this.maxInput = this.inputs.eq(1);
 		this.listenInputChange(this.inputs);
 	}
-});
+}
+DataMagic.Field.Number = DataMagic.Field.Base.extend(DMNumberField);
 DataMagic.DataType.Number.prototype.inputField = DataMagic.Field.Number;
 
 

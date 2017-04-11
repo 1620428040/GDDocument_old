@@ -129,9 +129,11 @@ class DataMagicList{
 					$sql.=" WHERE ".$where;
 				}
 			}
-			$pagesize = isset($params["pagesize"]) ? intval($params["pagesize"]) : 20 ;
-			$page = isset($params["page"]) ? intval($params["page"]) : 0 ;
-			$sql.=" LIMIT ".($page*$pagesize).",".$pagesize;
+			if(!isset($params["searchall"])){
+				$pagesize = isset($params["pagesize"]) ? intval($params["pagesize"]) : 20 ;
+				$page = isset($params["page"]) ? intval($params["page"]) : 0 ;
+				$sql.=" LIMIT ".($page*$pagesize).",".$pagesize;
+			}
 		}
 		$result=$this->db->query($sql);
 		$data=$result->fetchAll(PDO::FETCH_ASSOC);
@@ -201,7 +203,7 @@ class DataMagicList{
 		$result=array();
 		include("statistics.php");
 		$object=new statistics();
-		$dataList=$this->search(array("where"=>$params["where"]));
+		$dataList=$this->search(array("where"=>$params["where"],"searchall"=>TRUE));
 //		print_r($dataList);
 		$object->dataList=$dataList;//只用where条件进行搜索获取数据
 		foreach($todo as $statist){
