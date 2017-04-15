@@ -3,16 +3,15 @@
 	<head>
 		<meta charset="UTF-8">
 		<title>基本的树状图页面</title>
-		<script src="js/jquery-1.9.1.min.js" type="text/javascript" charset="utf-8"></script>
-		<script src="js/DataMagic-base.js" type="text/javascript" charset="utf-8"></script>
-		
-		<!--引用mui框架中的文件和适配mui的view部分-->
-		<link rel="stylesheet" type="text/css" href="view/mui/framework/css/mui.min.css"/>
-		<script src="view/mui/framework/mui.min.js" type="text/javascript" charset="utf-8"></script>
-		<link rel="stylesheet" type="text/css" href="view/mui/framework/mui.picker.min.css"/>
-		<script src="view/mui/framework/mui.picker.min.js" type="text/javascript" charset="utf-8"></script>
-		<script src="view/mui/DataMagic.mui.js" type="text/javascript" charset="utf-8"></script>
-		<link rel="stylesheet" type="text/css" href="view/mui/DataMagic.mui.css"/>
+		<script src="framework/jquery/jquery-1.9.1.min.js" type="text/javascript" charset="utf-8"></script>
+		<!--引用mui框架中的文件-->
+		<link rel="stylesheet" type="text/css" href="framework/mui/css/mui.min.css"/>
+		<script src="framework/mui/mui.min.js" type="text/javascript" charset="utf-8"></script>
+		<link rel="stylesheet" type="text/css" href="framework/mui/mui.picker.min.css"/>
+		<script src="framework/mui/mui.picker.min.js" type="text/javascript" charset="utf-8"></script>
+		<!--datamagic for mui-->
+		<script src="built/datamagic.mui.min.js" type="text/javascript" charset="utf-8"></script>
+		<link rel="stylesheet" type="text/css" href="built/datamagic.mui.min.css"/>
 		
 		<script type="text/javascript">
 			DataMagic.View.Tree=DataMagic.View.List.inherit("树状图",null,null,{

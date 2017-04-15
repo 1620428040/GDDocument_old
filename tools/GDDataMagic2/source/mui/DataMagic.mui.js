@@ -39,25 +39,68 @@ DataMagic.View.Toolbar.prototype.buildButton=function(command) {
 	return $('<a class="mui-tab-item DMButton" data-command="' + command + '"><span class="mui-icon mui-icon-plus"></span><span class="mui-tab-label">' + DataMagic.dictionary[command] + '</span></a>');
 }
 DataMagic.View.List.prototype.buildItem=function(){
-	return $('<li class="mui-table-view-cell mui-media DMItem">'
-			+'<div><span data-field="title"></span></div>'
-			+'<div style="font-size: 14px;color: gray;font-family: kaiti;">'
-				+'<span data-field="people" class="mui-pull-left"></span>'
-				+'<span data-field="date" class="mui-pull-right"></span>'
-			+'</div></li>');
+	return $('<li class="mui-table-view-cell mui-media DMItem">'+
+			'<div><span data-field="title"></span></div>'+
+			'<div style="font-size: 14px;color: gray;font-family: kaiti;">'+
+				'<span data-field="people" class="mui-pull-left"></span>'+
+				'<span data-field="date" class="mui-pull-right"></span>'+
+			'</div></li>');
 }
 DataMagic.Field.Base.prototype.buildField=function(name, meta, data) {
-	return $('<div class="mui-input-row"><label for="' + name + '">' + meta.title + '</label><input class="mui-input-clear DMInput" type="text" id="' + name + '" placeholder="' + (meta.describe||"") + '"/></div>');
+	return $('<div class="mui-input-row">'+
+				'<label for="' + name + '">' + meta.title + '</label>'+
+				'<input class="mui-input-clear DMInput" type="text" id="' + name + '" placeholder="' + (meta.describe||"") + '"/>'+
+			'</div>');
 }
-DataMagic.Field.LongText.prototype.buildField=function(name, meta, data) {
-	return $('<div class="mui-input-row" style="height: 120px;"><label for="' + name + '">' + meta.title + '</label><textarea id="' + name + '" style="height: 100%;" class="DMInput" rows="5" placeholder="' + (meta.describe||"") + '"></textarea></div>');
+
+var DMLongTextField={
+	title:"长文本输入框",
+	buildField:function(name, meta, data) {
+		return $('<div class="mui-input-row" style="height: 120px;">'+
+					'<label for="' + name + '">' + meta.title + '</label>'+
+					'<textarea id="' + name + '" style="height: 100%;" class="DMInput" rows="5" placeholder="' + (meta.describe||"") + '"></textarea>'+
+				'</div>');
+	}
 }
-DataMagic.Field.Number.prototype.buildSearchField=function(name, meta, data){
-	return $('<div class="mui-input-row"><label for="' + name + '">' + meta.title +
-		'</label><input class="mui-input-clear DMInput" type="text" id="' +
-		name + '" placeholder="' + (meta.describe||"") + '"/></div><div class="mui-input-row"><label>' +
-		'</label><input class="mui-input-clear DMInput" type="text"/></div>');
+DataMagic.Field.LongText = DataMagic.Field.Base.extend(DMLongTextField);
+DataMagic.DataType.LongText.prototype.inputField = DataMagic.Field.LongText;
+
+/* 数字类型的输入框
+ * 注意
+ * 如果将input控件改成number类型的，而且用户输入了字符，就无法触发change事件，所以是个坑
+ * 
+ * 属性
+ * input对应正常情况下的输入框
+ * minInput/maxInput在搜索状态下，输入最小值和最大值的输入框（数字类型及其子类）
+ */
+var DMNumberField={
+	title:"数字类型的输入框",
+	addon:{"min":"最小值","max":"最大值"},
+	buildSearchField:function(name, meta, data){
+		return $(this.buildInput(name, meta, data,"min")+
+				this.buildInput(name, meta, data,"max"));
+	},
+	buildInput:function(name, meta, data, type){
+		if(type){
+			var inputID = name + "-" + type ;
+			var html='<div class="mui-input-row">'+
+						'<label for="' + inputID + '">' + (type === "min" ? meta.title : "") +'</label>'+
+						'<input class="mui-input-clear DMInput" type="text" id="' +inputID + '" placeholder="输入要查找的 '+meta.title+'的范围的'+this.addon[type]+'"/>'+
+					'</div>';
+			return html;
+		}
+	},
+	createSearchField: function(name, meta, data) {
+		this.container = this.buildSearchField(name, meta, data);
+		this.inputs = this.container.find(".DMInput");
+		this.minInput = this.inputs.eq(0);
+		this.maxInput = this.inputs.eq(1);
+		this.listenInputChange(this.inputs);
+	}
 }
+DataMagic.Field.Number = DataMagic.Field.Base.extend(DMNumberField);
+DataMagic.DataType.Number.prototype.inputField = DataMagic.Field.Number;
+
 
 /* 日期类型输入框
    * 属性
@@ -67,14 +110,25 @@ DataMagic.Field.Number.prototype.buildSearchField=function(name, meta, data){
 DataMagic.Field.Date = DataMagic.Field.Number.inherit("日期类型输入框", null, null, {
 	format:"yyyy-MM-dd",
 	option:{"type": "date"},
-	buildField: function(name, meta, data) {
-		return $('<div class="mui-input-row"><label for="' + name + '">' + meta.title + '</label><label id="' + name + '" class="DMInput picker-input"></label></div>');
+	buildField: function(name, meta, data) {//disalbed
+		return $('<div class="mui-input-row">'+
+					'<label for="' + name + '">' + meta.title + '</label>'+
+					'<label id="' + name + '" class="DMInput picker-input"></label>'+
+				'</div>');
 	},
-	buildSearchField: function(name, meta, data) {
-		return $('<div class="mui-input-row"><label for="' + name + '">' + meta.title +
-			'</label><label class="DMInput picker-input" id="' +
-			name + '"></label></div><div class="mui-input-row" data-show="search"><label>' +
-			'</label><label class="DMInput picker-input"></label></div>');
+	buildSearchField:function(name, meta, data){
+		return $(this.buildInput(name, meta, data,"min")+
+				this.buildInput(name, meta, data,"max"));
+	},
+	buildInput:function(name, meta, data, type){
+		if(type){
+			var inputID = name + "-" + type ;
+			var html='<div class="mui-input-row">'+
+						'<label for="' + inputID + '">' + (type === "min" ? meta.title : "") +'</label>'+
+						'<label id="' +inputID + '" class="picker-input DMInput"></label>'+
+					'</div>';
+			return html;
+		}
 	},
 	//输入框被点击，弹出picker
 	onInputClick: function(input) {
@@ -112,11 +166,11 @@ DataMagic.DataType.DateTime.prototype.inputField = DataMagic.Field.DateTime;
 
 
 /* 单选类型的输入框
-   * 
-   * 属性
-   * picker 从底部弹出的选择器
-   * options选项
-   */
+ * 
+ * 属性
+ * picker 从底部弹出的选择器
+ * options选项
+ */
 DataMagic.Field.Select = DataMagic.Field.Date.inherit("单选类型的输入框", function(dataType) {
 	this.dataType = dataType;
 	this.picker = this.createPicker();
@@ -128,8 +182,8 @@ DataMagic.Field.Select = DataMagic.Field.Date.inherit("单选类型的输入框"
 			picker = $('<div id="popover-select" class="mui-popover mui-popover-action mui-popover-bottom">' +
 				'<ul class="mui-table-view" id="select-options"></ul>' +
 				'<ul class="mui-table-view">' +
-				'<li class="mui-table-view-cell"><a id="confirm"><b>确认</b></a></li>' +
-				'<li class="mui-table-view-cell"><a id="cancel"><b>取消</b></a></li>' +
+					'<li class="mui-table-view-cell"><a id="confirm"><b>确认</b></a></li>' +
+					'<li class="mui-table-view-cell"><a id="cancel"><b>取消</b></a></li>' +
 				'</ul></div>');
 			$("body").append(picker);
 		}

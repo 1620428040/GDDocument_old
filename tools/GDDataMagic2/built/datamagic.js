@@ -1,3 +1,4 @@
+﻿///<jscompress sourcefile="main.js" />
 "use strict";
 /* DataMagic  一个实现自定义列表、表单、表格等功能的框架
  * 
@@ -271,6 +272,8 @@ var DMAbstractField={
 }
 DataMagic.Field.Abstract = DataMagic.View.Abstract.extend(DMAbstractField);
 
+;
+///<jscompress sourcefile="datatype.js" />
 //================================================================
 //数据类型
 //================================================================
@@ -520,7 +523,8 @@ var DMBoolDataType={
 	}
 }
 DataMagic.DataType.Bool = DataMagic.DataType.Select.extend(DMBoolDataType);
-
+;
+///<jscompress sourcefile="model.js" />
 //================================================================
 //数据模型
 //================================================================
@@ -843,7 +847,8 @@ DataMagic.Model = Class.extend(DMListModel,{
 			}
 		});
 	}
-});
+});;
+///<jscompress sourcefile="controller.js" />
 //================================================================
 //控制器
 //================================================================
@@ -1070,9 +1075,8 @@ DataMagic.Controller = Class.extend(DMListController,{
 	}
 });
 //当DOM加载完成时，通知控制器，初始化视图对象
-$(DataMagic.Controller.onDOMLoad);
-
-
+$(DataMagic.Controller.onDOMLoad);;
+///<jscompress sourcefile="view.js" />
 //================================================================
 //视图部分
 //只使用jQuery的情况下，实现对页面元素的操作逻辑，只有基本的样式
@@ -1325,9 +1329,8 @@ var DMNumberField={
 	}
 }
 DataMagic.Field.Number = DataMagic.Field.Base.extend(DMNumberField);
-DataMagic.DataType.Number.prototype.inputField = DataMagic.Field.Number;
-
-
+DataMagic.DataType.Number.prototype.inputField = DataMagic.Field.Number;;
+///<jscompress sourcefile="test.js" />
 //================================================================
 //以下部分是方便测试用的函数
 //================================================================
@@ -1358,4 +1361,4 @@ function fill() {
 			node.text(data[kn]);
 		}
 	}
-}
+};
