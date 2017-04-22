@@ -14,3 +14,7 @@ data，标志是this.data,加载完成后，填入数据
 则自动下载，此时要注意处理没有设定服务器的情况
 
 
+视图对象动态绑定
+实现view类后，将view类注册到datamagic.viewclass中
+通过controller.bind()或者在是视图元素中添加data-bind属性，将视图和控制器绑定。如果没绑定，直接使用第一个
+当DOM加载完成后，为页面上的每一个DMView对应的元素创建对应的对象，放在view.instanceList中

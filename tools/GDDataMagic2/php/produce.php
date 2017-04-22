@@ -5,7 +5,7 @@
 
 //定义常量
 define('SQL_HOST', '192.168.1.80');   // 数据库服务器地址
-define('SQL_DBNAME', 'sw');    // 数据库名称
+define('SQL_DBNAME', 'gh');    // 数据库名称
 define('SQL_USERNAME', 'root');    // 数据库用户账号
 define('SQL_PASSWORD', '123456');    // 数据库用户密码
 //define('SQL_HOST', '192.168.1.138');   // 数据库服务器地址
@@ -31,7 +31,8 @@ define('SQL_CONNECTIONSTRING', 'mysql:dbname='.SQL_DBNAME.';host='.SQL_HOST);   
 //create("message", "oa_msg");
 //create("uploadfile", "oa_uploadfile");
 //create("department", "oa_hr_unit_info");
-create("user", "oa_v_user");
+//create("user", "oa_v_user");
+create("calendar", "calendar_m");
 
 function create($name,$tableName){
 	$path="../meta/".$name.".json";
