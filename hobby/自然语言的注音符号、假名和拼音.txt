@@ -27,10 +27,13 @@
 拉丁字母是目前世界上流传最广的字母体系
 汉语拼音用拉丁字母表示，但读音不同
 
-汉语拼音（26个）
-Aa Bb Cc Dd Ee Ff Gg Hh Ii Jj Kk Ll Mm Nn Oo Pp Qq Rr Ss Tt Uu ü Ww Xx Yy Zz（汉语中少一个V，多一个ü）
-英语（26个）
-Aa Bb Cc Dd Ee Ff Gg Hh Ii Jj Kk Ll Mm Nn Oo Pp Qq Rr Ss Tt Uu Vv Ww Xx Yy Zz
+英语字母（26个）
+A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
+a b c d e f g h i j k l m n o p q r s t u v w x y z
+汉语拼音字母（26个）
+a b c d e f g h i j k l m n o p q r s t u ü w x y z
+汉语拼音比英文字母少一个v，多一个ü。表示元音 /y/，即“鱼(yu)”字的发音，使用键盘输入时，用v替代，比如
+nü女、lü吕、nüe虐、lüe略	输入时用nv、lv、nve、lve
 
 
 ##假名和真名
