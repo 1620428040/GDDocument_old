@@ -1,0 +1,77 @@
+SHA，安全哈希算法（Secure Hash Algorithm）
+HMAC是密钥相关的哈希运算消息认证码（Hash-based Message Authentication Code）
+sha1.js是对SHA的实现
+
+
+核心函数
+function core_sha1(x, len)	输入二进制的数据和二进制数据的长度，计算hash值
+function core_hmac_sha1(key, data)	输入秘钥和数据，返回加密过得hash值
+
+
+
+常用函数
+将字符串转换为相应格式的hash值
+function hex_sha1(s)
+function b64_sha1(s)
+function str_sha1(s)
+function hex_hmac_sha1(key, data)
+function b64_hmac_sha1(key, data)
+function str_hmac_sha1(key, data)
+
+
+
+辅助函数
+转换数据的数据格式，“2”表示“to”的意思
+
+function str2binb(str)	将字符串转换成二进制数据
+显示出来是一个数值组成的数组。
+实际上是32位的二进制数据组成的数组，空位应该是用null补全的
+str2binb("1")		[822083584]
+str2binb("2")		[838860800]
+str2binb("1111")	[825307441]
+str2binb("1112")	[825307442]
+
+function binb2str(bin)
+function binb2hex(binarray)
+function binb2b64(binarray)
+
+
+
+数据格式的缩写
+binb	二进制
+str		字符串
+hex		十六进制
+b64		base64
+
+
+
+语法问题
+function binb2str(bin) {
+    var str = "";
+    var mask = (1 << chrsz) - 1;
+    for (var i = 0; i < bin.length * 32; i += chrsz)
+    str += String.fromCharCode((bin[i >> 5] >>> (24 - i % 32)) & mask);
+    return str;
+}
+<<左移运算符
+>>右移运算符
+>>>无符号右移，忽略符号位，空位都以0补齐
+chrsz是每个字符的位数，当chrsz=8时
+var mask = (1 << chrsz) - 1;即mask=11111111
+for (var i = 0; i < bin.length * 32; i += chrsz)	i表示当前处理的二进制数据的在整个二进制数据中的位置(位数)，从0开始，每次前进8位
+bin[i >> 5]		等效于bin[i/32]，实际上是取出当前处理的二进制数据所在的数值(这个数值保存在数组bin中)
+i % 32	的值在0,8,16,24之间循环；(24 - i % 32)	的值在24,16,8,0之间循环；
+(bin[i >> 5] >>> (24 - i % 32)) & mask去掉了其他位值上的数据，获取到了当前正在处理的二进制数据的值
+String.fromCharCode方法可以将数值转换成对应的字符
+
+如果完全不用位操作，并且简化逻辑，可以写成
+function binb2str(bin) {
+    var str = "";
+    var max = Math.pow(2,chrsz);
+    for(var i=0;i<bin.length;i++){
+    	for(var j=24;j>=0;j-=chrsz){
+    		str += String.fromCharCode(bin[i]/Math.pow(2,j)%max);
+    	}
+    }
+    return str;
+}
